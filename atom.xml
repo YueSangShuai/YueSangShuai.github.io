@@ -6,7 +6,7 @@
   <link href="http://yuesangshuai.github.io/atom.xml" rel="self"/>
   
   <link href="http://yuesangshuai.github.io/"/>
-  <updated>2025-03-06T07:47:59.132Z</updated>
+  <updated>2025-03-06T07:52:32.020Z</updated>
   <id>http://yuesangshuai.github.io/</id>
   
   <author>
@@ -17,13 +17,13 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
+    <title>高斯函数的方差</title>
     <link href="http://yuesangshuai.github.io/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/"/>
     <id>http://yuesangshuai.github.io/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/</id>
     <published>2025-03-06T07:01:47.386Z</published>
-    <updated>2025-03-06T07:47:59.132Z</updated>
+    <updated>2025-03-06T07:52:32.020Z</updated>
     
-    <content type="html"><![CDATA[<p>$$<br>\operatorname{var}(x)=E\left(x^2\right)-E[x]^2=\sigma^2<br>$$</p><h2 id="证明">证明</h2><p>我们已知高斯函数的期望为$E(x)=\mu$,然后通过方差的定义可以得到$var(x)=E[(x-u)^2]$所以我们可以得到<br>$$<br>\operatorname{Var}(X)=\mathbb{E}\left[(X-\mu)^2\right]=\int_{-\infty}^{\infty}(x-\mu)^2 f(x) d x<br>$$<br>最终的表达式如下:<br>$$<br>\operatorname{Var}(X)=\int_{-\infty}^{\infty}(x-\mu)^2 \frac{1}{\sqrt{2 \pi \sigma^2}} \exp \left(-\frac{(x-\mu)^2}{2 \sigma^2}\right) d x<br>$$</p><h3 id="变量替换">变量替换</h3><p>然后我们令$z=x-\mu$且$\frac{1}{\sqrt{2\pi\sigma^{2}}}$为常数项所以<br>$$<br>\begin{array}{r}{\mathrm{Var}(X)=\frac{1}{\sqrt{2\pi\sigma^{2}}}\int_{-\infty}^{\infty}z^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right),d z}\end{array}<br>$$<br>所以我们最后相当于要计算的就是<br>$$<br>I-\int_{-\infty}^{\infty}z^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)~{}d z<br>$$<br>我们通过分布积分来优化一下这个函数<br>$$<br>\begin{array}{r}{\int\dot{u},d\nu=\dot{u}\mathrm{v}-\int\dot{u}\dot{d u}.}\end{array}<br>$$<br>令$u=z$,$dv=z\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\ d z$<br>则有$du=dz$,$\int dv=\int z\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\ d z$<br>然后v和z的关系式可以这样去求<br>令$u=\frac{z^{2}}{2\sigma^{2}}$则$d u=\frac{z}{\sigma^{2}}d_{2}$<br>带入积分公式后可得<br>$$<br>v(z)=\int\exp(-u)\cdot\sigma^{2},d u<br>$$<br>最终可以得到表达式<br>$$<br>v(z)=-\sigma^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)+C<br>$$<br>已知令$u=z$和$v(z)=-\sigma^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)+C$</p><h3 id="分布积分">分布积分</h3><p>运用分布积分我们可以得到</p><p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/0c1dd1b0300c805e3b723e4a2de0c059.png" alt="0c1dd1b0300c805e3b723e4a2de0c059.png"><br>首先是第一项:$\begin{array}{r}{\left[-z\sigma^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\right]<em>{-\infty}^{\infty}}\end{array}$<br>满足$f(x)=-f(-x)$所以为奇函数，所以他的积分为0<br>然后看第二项:<br>$$<br>\sigma^{2}\int</em>{-\infty}^{\infty}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\ dz<br>$$<br>我们从《高斯函数的期望》可以得到<br>$$<br>I=\int_{-\infty}^{\infty}\exp\left(-\frac{x^{2}}{2}\right)\ d x<br>$$<br>$$<br>I=\sqrt{2\pi}<br>$$<br>所以第二项的结果为:$I=\sigma^{2}\cdot\sqrt{2\pi\sigma^{2}}$<br>所以高斯函数的方差是:<br>$$<br>\mathrm{Var}(X)=\frac{1}{\sqrt{2\pi\sigma^{2}}}\cdot I=\frac{1}{\sqrt{2\pi\sigma^{2}}}\cdot\sigma^{2}\cdot\sqrt{2\pi\sigma^{2}}=\sigma^{2}<br>$$</p>]]></content>
+    <content type="html"><![CDATA[<p>$$<br>\operatorname{var}(x)=E\left(x^2\right)-E[x]^2=\sigma^2<br>$$</p><h2 id="证明">证明</h2><p>我们已知高斯函数的期望为$E(x)=\mu$,然后通过方差的定义可以得到$var(x)=E[(x-u)^2]$所以我们可以得到<br>$$<br>\operatorname{Var}(X)=\mathbb{E}\left[(X-\mu)^2\right]=\int_{-\infty}^{\infty}(x-\mu)^2 f(x) d x<br>$$<br>最终的表达式如下:<br>$$<br>\operatorname{Var}(X)=\int_{-\infty}^{\infty}(x-\mu)^2 \frac{1}{\sqrt{2 \pi \sigma^2}} \exp \left(-\frac{(x-\mu)^2}{2 \sigma^2}\right) d x<br>$$</p><h3 id="变量替换">变量替换</h3><p>然后我们令$z=x-\mu$且$\frac{1}{\sqrt{2\pi\sigma^{2}}}$为常数项所以<br>$$<br>\begin{array}{r}{\mathrm{Var}(X)=\frac{1}{\sqrt{2\pi\sigma^{2}}}\int_{-\infty}^{\infty}z^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right),d z}\end{array}<br>$$<br>所以我们最后相当于要计算的就是<br>$$<br>I-\int_{-\infty}^{\infty}z^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)~{}d z<br>$$<br>我们通过分布积分来优化一下这个函数<br>$$<br>\begin{array}{r}{\int\dot{u},d\nu=\dot{u}\mathrm{v}-\int\dot{u}\dot{d u}.}\end{array}<br>$$<br>令$u=z$,$dv=z\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\ d z$<br>则有$du=dz$,$\int dv=\int z\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\ d z$<br>然后v和z的关系式可以这样去求<br>令$u=\frac{z^{2}}{2\sigma^{2}}$则$d u=\frac{z}{\sigma^{2}}d_{2}$<br>带入积分公式后可得<br>$$<br>v(z)=\int\exp(-u)\cdot\sigma^{2},d u<br>$$<br>最终可以得到表达式<br>$$<br>v(z)=-\sigma^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)+C<br>$$<br>已知令$u=z$和$v(z)=-\sigma^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)+C$</p><h3 id="分布积分">分布积分</h3><p>运用分布积分我们可以得到</p><p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/0c1dd1b0300c805e3b723e4a2de0c059.png" alt="0c1dd1b0300c805e3b723e4a2de0c059.png"></p><p>首先是第一项:$\begin{array}{r}{\left[-z\sigma^{2}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\right]_{-\infty}^{\infty}}\end{array}$</p><p>满足$f(x)=-f(-x)$所以为奇函数，所以他的积分为0<br>然后看第二项:</p><p>$$<br>\sigma^{2}\int_{-\infty}^{\infty}\exp\left(-\frac{z^{2}}{2\sigma^{2}}\right)\ dz<br>$$</p><p>我们从《高斯函数的期望》可以得到</p><p>$$<br>I=\int_{-\infty}^{\infty}\exp\left(-\frac{x^{2}}{2}\right)\ d x<br>$$</p><p>$$<br>I=\sqrt{2\pi}<br>$$</p><p>所以第二项的结果为:$I=\sigma^{2}\cdot\sqrt{2\pi\sigma^{2}}$<br>所以高斯函数的方差是:</p><p>$$<br>\mathrm{Var}(X)=\frac{1}{\sqrt{2\pi\sigma^{2}}}\cdot I=\frac{1}{\sqrt{2\pi\sigma^{2}}}\cdot\sigma^{2}\cdot\sqrt{2\pi\sigma^{2}}=\sigma^{2}<br>$$</p>]]></content>
     
     
       
@@ -37,6 +37,10 @@ $$&lt;/p&gt;
     
     
     
+    <category term="线性代数" scheme="http://yuesangshuai.github.io/categories/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/"/>
+    
+    
+    <category term="线性代数" scheme="http://yuesangshuai.github.io/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/"/>
     
   </entry>
   
@@ -180,35 +184,6 @@ $$&lt;/p&gt;
   </entry>
   
   <entry>
-    <title>神经网络优化器</title>
-    <link href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/"/>
-    <id>http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/</id>
-    <published>2025-03-06T07:01:47.373Z</published>
-    <updated>2025-03-06T07:01:47.384Z</updated>
-    
-    <content type="html"><![CDATA[<h1>优化器</h1><h2 id="1-神经网络的梯度">1.神经网络的梯度</h2><h3 id="1-1梯度">1.1梯度</h3><p>下面是如何求解导数</p><p>$$<br>\frac{df(x)}{dx}=\lim\limits_{x\rightarrow\infty}\frac{f(x+h)-f(x)}{h}<br>$$</p><p>举个例子速度的导数是加速反应了速度变换的快慢，所以在神经网络中导数往往决定方向下降的快慢。<br>下面是一个偏导数</p><p>$$<br>f(x_0,x_1)=x_0^2+x_1^2<br>$$</p><p>可以将神经网络中的神经元理解为这些自变量，而梯度则是对这些自变量求导，我们将他称之为偏导数（求哪个自变量就是对他比较偏心），这些偏导数称之为模型的梯度。</p><h3 id="1-2梯度法">1.2梯度法</h3><p>根据高中学习的知识可以知道，函数的极值出现在导数为0的部分，也就是梯度为0的部分。函数可能有多个极值点由此可见梯度下降可能会出现的一个就是局部最优解。<br><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_16921678799643.png" alt=""><br>梯度法的过程就是土话来说，我先确认一个方向向前跑几步，然后再求梯度之后再跑几步，其中这个具体跑几步就要由我们的学习率来决定了。<br>给出梯度下降的公式：<br>$$<br>x_0=x_0-\eta\dfrac{\partial f}{\partial x_0}<br>$$<br>$$<br>x_1=x_1-\eta\dfrac{\partial f}{\partial x_1}<br>$$<br>其中$\eta$就是神经网络中的学习率</p><h2 id="2神经网络动量">2神经网络动量</h2><h3 id="2-1一阶动量和二阶动量">2.1一阶动量和二阶动量</h3><p>通过高中物理知识可以知道动量的概念是物体在它运动方向上保持运动的趋势，是该物体质量和速度的乘积。土话来举个例子，孙策开大下船的时候船会往我们指定方向运动这就是动量。<br>一阶动量为过去各个时刻梯度的线性组合，而二阶动量自然是过去各个时刻梯度的平方的线性组合，虽然一阶动量确认梯度下降的路程，二阶动量确认梯度下降的速度。。<br>动量法的一般形式,先确定梯度：<br>$$<br>g_t=\nabla loss=\dfrac{\partial loss}{\partial \omega_t}<br>$$<br>这就和我上述讲的损失函数差不多对损失函数的每个权重求偏导的出来的就是权重。<br>这俩是一阶动量和二阶动量的表达式<br>$$<br>m_{t}=\phi\left(g_{1}, g_{2}, \cdots, g_{t}\right) ; V_{t}=\psi\left(g_{1}, g_{2}, \cdots, g_{t}\right)<br>$$<br>当前时刻下降的梯度<br>$$<br>\eta_t=\alpha·\dfrac{m_t}{\sqrt{V_t}}<br>$$<br>根据下降的梯度进行更新<br>$$<br>\omega_{t+1}= \omega_t-\eta_t<br>$$</p><h3 id="2-2-一阶矩和二阶矩">2.2 一阶矩和二阶矩</h3><p>假设梯度$g$是个随机变量，他的一阶矩就是他的期望，二阶矩就是方差（根据概率统计的定义得到的，高阶矩的目的就是为了验证概率$p(x)$是否随着x的增大而变小）</p><h3 id="2-3-动量法">2.3 动量法</h3><p>首先动量法的表达式如下：<br>$$<br>\eta_{t}=\gamma \eta_{t-1}+\alpha g_{t}<br>$$<br>$$<br>w_{t+1}=w_{t}-\eta_{t}<br>$$<br>如何将他转到之前定义下降的梯度$\eta_t=\alpha·\dfrac{m_t}{\sqrt{V_t}}$，我们做一下转换：<br>为了防止大家看不懂在写一个$t=1$时刻$\eta_0$的状态<br>$$<br>\eta_1=\alpha g_1<br>$$<br>$$<br>\begin{array}{l}<br>\eta_{t}=\gamma \eta_{t-1}+\alpha g_{t} \<br>=\gamma^2 \eta_{t-2}+\gamma \alpha g_{t-1}+\alpha g_{t} \<br>=\gamma^3 \eta_{t-3}+\gamma^{2} \alpha g_{t-2}+\gamma \alpha g_{t-1}+\alpha g_{t} \<br>=\cdots \<br>=\gamma^{t-1} \alpha g_{1}+\gamma^{t-2} \alpha g_{2}+\cdots+\gamma^{0}\alpha g_{t}<br>\end{array}<br>$$<br>大家通常也跑过优化器的代码应该知道$\gamma$通常取小于1的值所以$\gamma$离当前时刻越远占的权重就越小，这个叫做指数加权移动平均。虽然，动量法的一阶动量不是取过去所有时间步梯度的平均，但同样能用来控制模型更新的方向，动量法以来指数加权平均使得自变量的更新方向更加一致。而动量法的二阶梯度取为1，所以常说动量法只利用了一阶梯度的信息。</p><h3 id="2-4-SGD">2.4 SGD</h3><p>SGD中他的一阶动量和二阶动量定义如下<br>$$<br>m_{t}=g_{t};V_{t}=I^2<br>$$<br>因此他的当前时刻下降的梯度为<br>$$<br>\eta_t=\alpha·g_{t}<br>$$<br>SGD最大的缺点是下降速度慢，而且可能会在凹凸的两边持续震荡，停留在一个局部最优点。</p><h3 id="2-5-SGD-with-Momentum">2.5 SGD with Momentum</h3><p>为了抑制SGD的震荡，SGDM认为梯度下降过程可以加入惯性。下坡的时候，如果发现是陡坡，那就利用惯性跑的快一些。SGDM全称是SGD with momentum，在SGD基础上引入了一阶动量：<br>$$<br>m_t=\beta_1<em>m_{t-1}+(1-\beta)·g_t<br>$$<br>我们将这个式子换一个形式先将他展开：<br><font color="red"><br>$$<br>m_t=\beta_1</em>m_{t-1}+g_t-\beta_1·g_t<br>$$<br></font><br>之后我们合并一下同类项：</p><p>$$<br>m_t=g_t+\beta_1*(m_{t-1}-g_t)<br>$$<br>这个式子有没有类似与卡尔曼滤波中的后验估计的求解。<br>卡尔曼是用测量值-先验值，这里是用先验值-测量值。<br>相当于他这个求的是$\dfrac{1}{1-\beta_1}$个时刻的平均值，但是此时这个$\beta_1$是个超参数是个定值一般取$0.9$</p><p>这个解决了SGD中收敛缓慢的问题但是还有一个局部最优的问题没有解决。</p><h3 id="2-6-SGD-with-Nesterov-Acceleration">2.6 SGD with Nesterov Acceleration</h3><p>先给出他的改进点主要在第一步：<br>$$<br>g_{t}=\nabla f\left(w_{t}-\alpha \cdot m_{t-1} / \sqrt{V_{t-1}}\right)<br>$$<br>根据上面的表达式我们可以知道$\alpha \cdot m_{t-1} / \sqrt{V_{t-1}}$代表的是当前时刻的梯度因此先下降一步，相当于走出去看看，不行就回去。</p><h3 id="2-7-AdaGrad">2.7 AdaGrad</h3><p>这里给出二阶动量的表达式:<br>$$<br>V_t= {\textstyle \sum_{t}^{T=1}} g_T^2<br>$$<br>表示所有梯度值的平方，因此我们此时的学习率变成了$\alpha/\sqrt{V_t}$,当梯度整体下降的慢也就是速度较小的时候，相当于学习率会大一点加快下降的速度。<br>在这之前我提到过高阶矩的目的，这里大家可以去详细了解一下高阶矩，他有个好记的特性就是对极大值特别的敏感，随着梯度越大下降的速度应该更快。<br>这里因为$\sqrt{V_t}$是个单调递增的函数，所以学习率可能下降的很快导致有一些特征没有学到这就是他的缺点。</p><h3 id="2-8AdaDelta-RMSProp">2.8AdaDelta / RMSProp</h3><p>这个方法和SGD with Momentum有点相似不过他这里是为了防止学习率太低的情况，<br>$$<br>V_t=\beta_2*V_{t-1}+(1-\beta_2)·g_t^2<br>$$</p><h3 id="2-9Adam">2.9Adam</h3><p>阿蛋优化器集合了一阶动量以及二阶动量的特点：<br>$$<br>m_t=\beta_1*m_{t-1}+(1-\beta)·g_t<br>$$</p><p>$$<br>V_t=\beta_2*V_{t-1}+(1-\beta_2)·g_t^2<br>$$</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1&gt;优化器&lt;/h1&gt;
-&lt;h2 id=&quot;1-神经网络的梯度&quot;&gt;1.神经网络的梯度&lt;/h2&gt;
-&lt;h3 id=&quot;1-1梯度&quot;&gt;1.1梯度&lt;/h3&gt;
-&lt;p&gt;下面是如何求解导数&lt;/p&gt;
-&lt;p&gt;$$&lt;br&gt;
-&#92;frac{df(x)}{dx}=&#92;lim&#92;limits_{x&#92;rightarr</summary>
-      
-    
-    
-    
-    <category term="神经网络" scheme="http://yuesangshuai.github.io/categories/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"/>
-    
-    
-    <category term="优化器" scheme="http://yuesangshuai.github.io/tags/%E4%BC%98%E5%8C%96%E5%99%A8/"/>
-    
-  </entry>
-  
-  <entry>
     <title>YoloV3 Anchor生成正负样本</title>
     <link href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/YoloV3%20Anchor%E7%94%9F%E6%88%90%E6%AD%A3%E8%B4%9F%E6%A0%B7%E6%9C%AC/"/>
     <id>http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/YoloV3%20Anchor%E7%94%9F%E6%88%90%E6%AD%A3%E8%B4%9F%E6%A0%B7%E6%9C%AC/</id>
@@ -259,6 +234,35 @@ $$&lt;/p&gt;
     
     
     <category term="交叉熵损失" scheme="http://yuesangshuai.github.io/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>神经网络优化器</title>
+    <link href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/"/>
+    <id>http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/</id>
+    <published>2025-03-06T07:01:47.373Z</published>
+    <updated>2025-03-06T07:01:47.384Z</updated>
+    
+    <content type="html"><![CDATA[<h1>优化器</h1><h2 id="1-神经网络的梯度">1.神经网络的梯度</h2><h3 id="1-1梯度">1.1梯度</h3><p>下面是如何求解导数</p><p>$$<br>\frac{df(x)}{dx}=\lim\limits_{x\rightarrow\infty}\frac{f(x+h)-f(x)}{h}<br>$$</p><p>举个例子速度的导数是加速反应了速度变换的快慢，所以在神经网络中导数往往决定方向下降的快慢。<br>下面是一个偏导数</p><p>$$<br>f(x_0,x_1)=x_0^2+x_1^2<br>$$</p><p>可以将神经网络中的神经元理解为这些自变量，而梯度则是对这些自变量求导，我们将他称之为偏导数（求哪个自变量就是对他比较偏心），这些偏导数称之为模型的梯度。</p><h3 id="1-2梯度法">1.2梯度法</h3><p>根据高中学习的知识可以知道，函数的极值出现在导数为0的部分，也就是梯度为0的部分。函数可能有多个极值点由此可见梯度下降可能会出现的一个就是局部最优解。<br><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_16921678799643.png" alt=""><br>梯度法的过程就是土话来说，我先确认一个方向向前跑几步，然后再求梯度之后再跑几步，其中这个具体跑几步就要由我们的学习率来决定了。<br>给出梯度下降的公式：<br>$$<br>x_0=x_0-\eta\dfrac{\partial f}{\partial x_0}<br>$$<br>$$<br>x_1=x_1-\eta\dfrac{\partial f}{\partial x_1}<br>$$<br>其中$\eta$就是神经网络中的学习率</p><h2 id="2神经网络动量">2神经网络动量</h2><h3 id="2-1一阶动量和二阶动量">2.1一阶动量和二阶动量</h3><p>通过高中物理知识可以知道动量的概念是物体在它运动方向上保持运动的趋势，是该物体质量和速度的乘积。土话来举个例子，孙策开大下船的时候船会往我们指定方向运动这就是动量。<br>一阶动量为过去各个时刻梯度的线性组合，而二阶动量自然是过去各个时刻梯度的平方的线性组合，虽然一阶动量确认梯度下降的路程，二阶动量确认梯度下降的速度。。<br>动量法的一般形式,先确定梯度：<br>$$<br>g_t=\nabla loss=\dfrac{\partial loss}{\partial \omega_t}<br>$$<br>这就和我上述讲的损失函数差不多对损失函数的每个权重求偏导的出来的就是权重。<br>这俩是一阶动量和二阶动量的表达式<br>$$<br>m_{t}=\phi\left(g_{1}, g_{2}, \cdots, g_{t}\right) ; V_{t}=\psi\left(g_{1}, g_{2}, \cdots, g_{t}\right)<br>$$<br>当前时刻下降的梯度<br>$$<br>\eta_t=\alpha·\dfrac{m_t}{\sqrt{V_t}}<br>$$<br>根据下降的梯度进行更新<br>$$<br>\omega_{t+1}= \omega_t-\eta_t<br>$$</p><h3 id="2-2-一阶矩和二阶矩">2.2 一阶矩和二阶矩</h3><p>假设梯度$g$是个随机变量，他的一阶矩就是他的期望，二阶矩就是方差（根据概率统计的定义得到的，高阶矩的目的就是为了验证概率$p(x)$是否随着x的增大而变小）</p><h3 id="2-3-动量法">2.3 动量法</h3><p>首先动量法的表达式如下：<br>$$<br>\eta_{t}=\gamma \eta_{t-1}+\alpha g_{t}<br>$$<br>$$<br>w_{t+1}=w_{t}-\eta_{t}<br>$$<br>如何将他转到之前定义下降的梯度$\eta_t=\alpha·\dfrac{m_t}{\sqrt{V_t}}$，我们做一下转换：<br>为了防止大家看不懂在写一个$t=1$时刻$\eta_0$的状态<br>$$<br>\eta_1=\alpha g_1<br>$$<br>$$<br>\begin{array}{l}<br>\eta_{t}=\gamma \eta_{t-1}+\alpha g_{t} \<br>=\gamma^2 \eta_{t-2}+\gamma \alpha g_{t-1}+\alpha g_{t} \<br>=\gamma^3 \eta_{t-3}+\gamma^{2} \alpha g_{t-2}+\gamma \alpha g_{t-1}+\alpha g_{t} \<br>=\cdots \<br>=\gamma^{t-1} \alpha g_{1}+\gamma^{t-2} \alpha g_{2}+\cdots+\gamma^{0}\alpha g_{t}<br>\end{array}<br>$$<br>大家通常也跑过优化器的代码应该知道$\gamma$通常取小于1的值所以$\gamma$离当前时刻越远占的权重就越小，这个叫做指数加权移动平均。虽然，动量法的一阶动量不是取过去所有时间步梯度的平均，但同样能用来控制模型更新的方向，动量法以来指数加权平均使得自变量的更新方向更加一致。而动量法的二阶梯度取为1，所以常说动量法只利用了一阶梯度的信息。</p><h3 id="2-4-SGD">2.4 SGD</h3><p>SGD中他的一阶动量和二阶动量定义如下<br>$$<br>m_{t}=g_{t};V_{t}=I^2<br>$$<br>因此他的当前时刻下降的梯度为<br>$$<br>\eta_t=\alpha·g_{t}<br>$$<br>SGD最大的缺点是下降速度慢，而且可能会在凹凸的两边持续震荡，停留在一个局部最优点。</p><h3 id="2-5-SGD-with-Momentum">2.5 SGD with Momentum</h3><p>为了抑制SGD的震荡，SGDM认为梯度下降过程可以加入惯性。下坡的时候，如果发现是陡坡，那就利用惯性跑的快一些。SGDM全称是SGD with momentum，在SGD基础上引入了一阶动量：<br>$$<br>m_t=\beta_1<em>m_{t-1}+(1-\beta)·g_t<br>$$<br>我们将这个式子换一个形式先将他展开：<br><font color="red"><br>$$<br>m_t=\beta_1</em>m_{t-1}+g_t-\beta_1·g_t<br>$$<br></font><br>之后我们合并一下同类项：</p><p>$$<br>m_t=g_t+\beta_1*(m_{t-1}-g_t)<br>$$<br>这个式子有没有类似与卡尔曼滤波中的后验估计的求解。<br>卡尔曼是用测量值-先验值，这里是用先验值-测量值。<br>相当于他这个求的是$\dfrac{1}{1-\beta_1}$个时刻的平均值，但是此时这个$\beta_1$是个超参数是个定值一般取$0.9$</p><p>这个解决了SGD中收敛缓慢的问题但是还有一个局部最优的问题没有解决。</p><h3 id="2-6-SGD-with-Nesterov-Acceleration">2.6 SGD with Nesterov Acceleration</h3><p>先给出他的改进点主要在第一步：<br>$$<br>g_{t}=\nabla f\left(w_{t}-\alpha \cdot m_{t-1} / \sqrt{V_{t-1}}\right)<br>$$<br>根据上面的表达式我们可以知道$\alpha \cdot m_{t-1} / \sqrt{V_{t-1}}$代表的是当前时刻的梯度因此先下降一步，相当于走出去看看，不行就回去。</p><h3 id="2-7-AdaGrad">2.7 AdaGrad</h3><p>这里给出二阶动量的表达式:<br>$$<br>V_t= {\textstyle \sum_{t}^{T=1}} g_T^2<br>$$<br>表示所有梯度值的平方，因此我们此时的学习率变成了$\alpha/\sqrt{V_t}$,当梯度整体下降的慢也就是速度较小的时候，相当于学习率会大一点加快下降的速度。<br>在这之前我提到过高阶矩的目的，这里大家可以去详细了解一下高阶矩，他有个好记的特性就是对极大值特别的敏感，随着梯度越大下降的速度应该更快。<br>这里因为$\sqrt{V_t}$是个单调递增的函数，所以学习率可能下降的很快导致有一些特征没有学到这就是他的缺点。</p><h3 id="2-8AdaDelta-RMSProp">2.8AdaDelta / RMSProp</h3><p>这个方法和SGD with Momentum有点相似不过他这里是为了防止学习率太低的情况，<br>$$<br>V_t=\beta_2*V_{t-1}+(1-\beta_2)·g_t^2<br>$$</p><h3 id="2-9Adam">2.9Adam</h3><p>阿蛋优化器集合了一阶动量以及二阶动量的特点：<br>$$<br>m_t=\beta_1*m_{t-1}+(1-\beta)·g_t<br>$$</p><p>$$<br>V_t=\beta_2*V_{t-1}+(1-\beta_2)·g_t^2<br>$$</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1&gt;优化器&lt;/h1&gt;
+&lt;h2 id=&quot;1-神经网络的梯度&quot;&gt;1.神经网络的梯度&lt;/h2&gt;
+&lt;h3 id=&quot;1-1梯度&quot;&gt;1.1梯度&lt;/h3&gt;
+&lt;p&gt;下面是如何求解导数&lt;/p&gt;
+&lt;p&gt;$$&lt;br&gt;
+&#92;frac{df(x)}{dx}=&#92;lim&#92;limits_{x&#92;rightarr</summary>
+      
+    
+    
+    
+    <category term="神经网络" scheme="http://yuesangshuai.github.io/categories/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="优化器" scheme="http://yuesangshuai.github.io/tags/%E4%BC%98%E5%8C%96%E5%99%A8/"/>
     
   </entry>
   
