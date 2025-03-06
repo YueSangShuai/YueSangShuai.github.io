@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="mask-icon" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Serif Simplified Chinese:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-mac-osx.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yuesangshuai.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="穷苦人民如何用移动固态配置unbutu22.04 (这篇博客大部分都是查找的别人的博客或者CSDN我对这些内容进行整理出来的，如果有侵权请联系我) 因为深度学习大部分用的是linux系统，而且之后很多代码也要部署到nuc和nx上，但是我刚好又在外面实习，在电脑空间不足的情况下我选择使用移动固态作为unbutu的系统盘 对于显卡的部分我放在cuda,cudnn,tensorrt一起讲 一.unbut">
+<meta property="og:type" content="article">
+<meta property="og:title" content="穷苦人民如何用移动固态配置unbutu22.04">
+<meta property="og:url" content="http://yuesangshuai.github.io/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/index.html">
+<meta property="og:site_name" content="你好陌生人">
+<meta property="og:description" content="穷苦人民如何用移动固态配置unbutu22.04 (这篇博客大部分都是查找的别人的博客或者CSDN我对这些内容进行整理出来的，如果有侵权请联系我) 因为深度学习大部分用的是linux系统，而且之后很多代码也要部署到nuc和nx上，但是我刚好又在外面实习，在电脑空间不足的情况下我选择使用移动固态作为unbutu的系统盘 对于显卡的部分我放在cuda,cudnn,tensorrt一起讲 一.unbut">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e8c99bb2c1e248d89a1b3c4a2c0d314f_9ddf4445e29b4cd59.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/b5aa7604a9534f4aac8f267432ed929d_0e77ecf57bbe452aa.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/1423bd21f24d4b72bc99006f7d72dcc6_ca4cffa938d947c6b.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6ea0ae63aee048c4a9e2b7f1835e30cf_d79e25afc14e43e28.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/f9dbede4c7874791b8ef7d19845d037e_46536698b9544bbab.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/89b2aec2682a40f5b394c994ffa80298_89b84160b493400ab.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/499cdb3df50f4b0b96f59a5defe44d98_b1d48cff15244a559.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/fbbcfbc92eec4577a5bf0f5e6745668f_f8f57e87fb624e2a8.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c334ef13071c4698bf9da9370097a513_e2a193614b71455a8.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/449f2b121cf34e08af2d4908bc4d2b07_e6e8d05c573a4c48a.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/360845479585416e83db2f5653f8ad63_6c812ef0fd7a4c6bb.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6e53397555664df6911765dd10912886_b236dcce821f46a89.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/a2f2db6d0cf84869880a3a747bc5623b_032faaab3fc945238.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e67fce7d344a415c868f450843dfb0c4_50024374098648a99.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/7bccbad88403447fadb4977f3b4e13af_a8cef1d3c9614cd38.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/00466458ba5640c7863bc2ae21f2c900_4daf4731c45d47f48.png">
+<meta property="article:published_time" content="2025-03-06T07:01:47.372Z">
+<meta property="article:modified_time" content="2025-03-06T07:01:47.372Z">
+<meta property="article:author" content="YueSang">
+<meta property="article:tag" content="ubuntu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e8c99bb2c1e248d89a1b3c4a2c0d314f_9ddf4445e29b4cd59.png">
+
+<link rel="canonical" href="http://yuesangshuai.github.io/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+
+<script type="text/javascript" src="/custom/js/head/love.js"></script>
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+<script type="text/javascript" src="/custom/js/head/fire.js"></script>
+
+
+<script type = "text/javascript" src="/custom/js/head/snow.js"></script>
+
+
+<script src="/live2d-widget/autoload.js"></script>
+
+
+<div id="catcat"></div>
+<link rel="stylesheet" href="/custom/css/head/cat.css">
+<script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script defer data-pjax src="/custom/js/head/cat.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/cursor.css">
+<script defer data-pjax src="/custom/js/head/cursor.js"></script>
+
+
+<span id="fps"></span> 
+<link rel="stylesheet" href="/custom/css/head/fps.css">
+<script src="/custom/js/head/fps.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/scorllbar.css">
+
+
+<link rel="stylesheet" href="/custom/css/body.css">
+
+
+<script defer data-pjax src="/custom/js/head/cursormove.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/funny_title.js"></script>
+
+
+<div id="scroll-buttons">
+  <button id="scroll-to-top">↑</button>
+  <button id="scroll-to-bottom">↓</button>
+</div>
+<script defer data-pjax src="/custom/js/head/topdown.js"></script>
+<link rel="stylesheet" href="/custom/css/head/topdown.css">
+
+
+<script defer data-pjax src="/custom/js/head/sun_moon.js"></script>
+<link rel="stylesheet" href="/custom/css/head/sun_moon.css">
+
+
+<script defer data-pjax src="/custom/js/head/tag-styles.js"></script>
+<link rel="stylesheet" href="/custom/css/head/tag-styles.css">
+
+
+<link rel="stylesheet" href="/custom/css/head/recent_post.css">
+
+<script defer data-pjax src="/custom/js/head/random_img_recent_post.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/category.css">
+
+
+
+<script defer data-pjax src="/custom/js/head/raydar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/bar.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/loading/default.css">
+<script defer data-pjax src="/custom/js/head/loading.js"></script>
+
+
+
+
+<script defer data-pjax src="/custom/js/head/code-unfloder.js"></script>
+<link rel="stylesheet" href="/custom/css/head/highlight.css">
+
+
+<script defer data-pjax src="/custom/js/head/SAO_Menu.js"></script>
+
+
+<script defer data-pjax src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/js/swiper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/css/swiper.min.css">
+<script defer data-pjax src="/custom/js/head/swiper_init.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <title>穷苦人民如何用移动固态配置unbutu22.04 | 你好陌生人</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+<link rel="alternate" href="/atom.xml" title="你好陌生人" type="application/atom+xml">
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+
+  
+  
+  
+    <div id="loading-box">
+  <div class="SAO-scene">
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+  </div>
+</div>
+
+    <div class="pretype" id="default"></div>
+  
+
+
+<div id="SAO-back">
+  <div id="SAO-menu">
+    <div id="SAO-menu-content">
+            
+            <div class="utils-list">
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Tell</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">Anything can I help you ?</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-question-circle" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/guestbook/')},500);"></i>
+                    
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Menu</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">The menu of my blog</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-tasks" onclick="panelAudio();UtilsClick()"></i>
+                    
+                    
+                        
+                            
+                        
+                        <div class="menu-list" style="top:-143px;">
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-home" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/')},500);">Home</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="panelAudio();MenusClick()">Document</i>
+                            
+                            
+                                
+                                    
+                                
+
+                                <div class="menu-child" style="top:-40px;">
+                                
+                                    <div class="menu-list-child">
+                                    
+                                        <i class="fa fa-file-invoice" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/hexo%E9%85%8D%E7%BD%AE/')},500);">Beautify</i>
+                                    
+                                    </div>
+                                
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-archive" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/archives/')},500);">Archives</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/')},500);">Categoties</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-tags" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/tags/')},500);">Tags</i>
+                            
+                            
+                            </div>
+                        
+                        </div>
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">log out</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">log out</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-power-off" onclick="clickAudio();setTimeout(function(){SAOclose();SAOKeepOff()},500);"></i>
+                    
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">你好陌生人</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-book fa-fw"></i>guestbook</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yuesangshuai.github.io/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+      <meta itemprop="name" content="YueSang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="你好陌生人">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          穷苦人民如何用移动固态配置unbutu22.04
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-06 15:01:47" itemprop="dateCreated datePublished" datetime="2025-03-06T15:01:47+08:00">2025-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">环境配置</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/" class="post-meta-item leancloud_visitors" data-flag-title="穷苦人民如何用移动固态配置unbutu22.04" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+<section class="main-hero-waves-area waves-area">
+  <svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path>
+    </defs>
+    <g class="parallax">
+      <use href="#gentle-wave" x="48" y="0"></use>
+      <use href="#gentle-wave" x="48" y="3"></use>
+      <use href="#gentle-wave" x="48" y="5"></use>
+      <use href="#gentle-wave" x="48" y="7"></use>
+    </g>
+  </svg>
+</section>
+<link rel="stylesheet" href="/custom/css/post-meta/wave.css">
+
+
+<link rel="stylesheet" href="/custom/css/post-meta/fengche.css">
+
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>穷苦人民如何用移动固态配置unbutu22.04</h1>
+<p>(这篇博客大部分都是查找的别人的博客或者CSDN我对这些内容进行整理出来的，如果有侵权请联系我)</p>
+<p>因为深度学习大部分用的是linux系统，而且之后很多代码也要部署到nuc和nx上，但是我刚好又在外面实习，在电脑空间不足的情况下我选择使用移动固态作为unbutu的系统盘</p>
+<p>对于显卡的部分我放在cuda,cudnn,tensorrt一起讲</p>
+<h2 id="一-unbutu系统的安装"><a href="#"></a>一.unbutu系统的安装</h2>
+<p>具体可以详见这位大佬的CSDN：<a target="_blank" rel="noopener" href="https://www.edwardzcn98yx.com/post/8bb234ab.html" title="UbuntuToGo——打造属于自己的移动固态热插拔Liniux操作系统 - Edward's blog">UbuntuToGo——打造属于自己的移动固态热插拔Liniux操作系统 - Edward’s blog</a></p>
+<p>这里提几点需要注意的事项</p>
+<p> 1.安装的时候看好盘，不要把你默认的window盘格式化掉</p>
+<p> 2.记得选择其他选项</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e8c99bb2c1e248d89a1b3c4a2c0d314f_9ddf4445e29b4cd59.png" alt=""></p>
+<p>3.首先要选择你的主板对应的ubuntu版本，因为我的电脑是y9000p用20.04的话是连不上WIFE所以我采用了最新的22.04版本并且可以成功连接上WIFE</p>
+<p>4.个人建议是安装英文版本的ubuntu之后可以在设置里面改成中文，但是文件夹名字依然为英文避免英文路径出错。</p>
+<p>5.我移动硬盘是512g,硬盘装ubuntu系统分区是要自己去划分的；这里我给出我的分区</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#以下单位为MB</span><br><span class="line">swap 16384 #交换区一般给内存的大小，16g的可以多给1-2G</span><br><span class="line">/home 225820 #建议多给点</span><br><span class="line">/boot 1024</span><br><span class="line">EIF 256</span><br><span class="line">/tmp 5120 #这里是个坑，我在配置cuda的时候踩到了</span><br><span class="line">/  #剩下的空间都给他，建议大点</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对于22的颜值我首先是表示肯定的</p>
+<img width="1200" height="746" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/b5aa7604a9534f4aac8f267432ed929d_0e77ecf57bbe452aa.png" class="jop-noMdConv">
+<p>是不是有点window那味了</p>
+<h2 id="二-关于语言以及中文输入法"><a href="#"></a>二.关于语言以及中文输入法</h2>
+<p>进入setting-&gt;区域与语言，之后选择管理已安装的语言</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/1423bd21f24d4b72bc99006f7d72dcc6_ca4cffa938d947c6b.png" alt=""></p>
+<p>添加语言中选择汉语，</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6ea0ae63aee048c4a9e2b7f1835e30cf_d79e25afc14e43e28.png" alt=""></p>
+<p> 键盘这里选择+号，添加ibus中文输入法</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/f9dbede4c7874791b8ef7d19845d037e_46536698b9544bbab.png" alt=""></p>
+<h2 id="三-给ubuntu换源"><a href="#"></a> 三.给<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=ubuntu%E6%8D%A2%E6%BA%90&amp;spm=1001.2101.3001.7020">ubuntu换源</a></h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gedit /etc/apt/sources.list</span><br></pre></td></tr></table></figure>
+<p>清华</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse</span><br><span class="line">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse</span><br><span class="line"> </span><br><span class="line"># 预发布软件源，不建议启用</span><br><span class="line"># deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse</span><br><span class="line"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>阿里</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>中科大</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">deb https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse</span><br><span class="line">deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse</span><br><span class="line">deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse</span><br><span class="line">deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse</span><br><span class="line">deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse</span><br><span class="line">deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse</span><br><span class="line">deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse</span><br><span class="line">deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse</span><br><span class="line">deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse</span><br><span class="line">deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>（个人觉得中科大的比较快）然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get upgrade</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>完成ubuntu源的更新</p>
+<h2 id="四-下载谷歌浏览器"><a href="#"></a>四.下载谷歌浏览器</h2>
+<h3 id="1-通过使用Ctrl-Alt-T键盘快捷键或单击终端图标来打开终端"><a href="#"></a>1.通过使用<code>Ctrl+Alt+T</code>键盘快捷键或单击终端图标来打开终端</h3>
+<p>使用wget下载最新的Google Chrome <code>.deb</code>软件包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb</span><br></pre></td></tr></table></figure>
+<h3 id="2-安装Google-Chrome"><a href="#"></a>2.安装Google Chrome</h3>
+<p>在Ubuntu上安装软件包需要管理权限。以<a target="_blank" rel="noopener" href="https://www.iplayio.cn/post/816316675" title="具有sudo特权">具有sudo特权</a>的用户身份运行以下命令，以<code>.deb</code>在系统上安装Chrome 软件包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install ./google-chrome-stable_current_amd64.deb</span><br></pre></td></tr></table></figure>
+<p>个人建议最好科学上网一下可以把window下谷歌的一些配置导入进来</p>
+<h2 id="五-微信的安装"><a href="#"></a>五.微信的安装</h2>
+<p><strong>添加仓库</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update  </span><br><span class="line">sudo wget -O- https://deepin-wine.i-m.dev/setup.sh | sh</span><br></pre></td></tr></table></figure>
+<p><strong>安装</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install synaptic</span><br></pre></td></tr></table></figure>
+<p><a href="#"></a><strong>卸载</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get remove --purge synaptic</span><br></pre></td></tr></table></figure>
+<p><code>--purge</code>是删除了配置文件。</p>
+<p><strong>进入新得力</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo synaptic </span><br></pre></td></tr></table></figure>
+<p>进入后的界面</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/89b2aec2682a40f5b394c994ffa80298_89b84160b493400ab.png" alt=""></p>
+<p> 搜索微信后直接安装</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/499cdb3df50f4b0b96f59a5defe44d98_b1d48cff15244a559.png" alt=""></p>
+<h2 id="六-ubuntu界面的美化"><a href="#"></a>六.ubuntu界面的美化</h2>
+<p>ubuntu22是基于gone美化的，我装了一次kde界面然后我就重装了我的系统…先上才艺</p>
+<img width="1200" height="750" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/fbbcfbc92eec4577a5bf0f5e6745668f_f8f57e87fb624e2a8.png" class="jop-noMdConv">
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c334ef13071c4698bf9da9370097a513_e2a193614b71455a8.png" alt=""></p>
+<h3 id="1-gone美化"><a href="#"></a>1.gone美化</h3>
+<p><strong>首先依赖安装</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install gnome-tweaks chrome-gnome-shell</span><br><span class="line">sudo apt install gtk2-engines-murrine gtk2-engines-pixbuf </span><br><span class="line">sudo apt install sassc optipng inkscape libcanberra-gtk-module libglib2.0-dev libxml2-utils</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p> gnome 插件的网址是：<a href="https://link.zhihu.com/?target=https%3A//extensions.gnome.org" title="https://extensions.gnome.org">https://extensions.gnome.org</a></p>
+<p>这里建议科学上网，直接去谷歌商店安装</p>
+<img width="1200" height="467" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/449f2b121cf34e08af2d4908bc4d2b07_e6e8d05c573a4c48a.png" class="jop-noMdConv">
+<p>这是进入之后的页面</p>
+<ul>
+<li>user themes（可以把ubuntu换成mac样子的格式）</li>
+<li>dash to dock（像我页面中最左边那个一样）</li>
+<li>netspeed（网速测试）</li>
+</ul>
+<p>这几个是我装的插件</p>
+<p><img width="1200" height="826" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/360845479585416e83db2f5653f8ad63_6c812ef0fd7a4c6bb.png" class="jop-noMdConv">按照好后进入这个页面进行插件的打开，点击dash to dock的设置按钮就可以进行修改了</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6e53397555664df6911765dd10912886_b236dcce821f46a89.png" alt=""></p>
+<p> 美化包都可以从 <a href="https://link.zhihu.com/?target=https%3A//www.gnome-look.org/" title="https://www.gnome-look.org">https://www.gnome-look.org</a> 这个网站下载的</p>
+<p>Ubuntu 22.04 为所有用户提供的默认存放主题的文件夹分别如下：</p>
+<ul>
+<li>主题包：/usr/share/themes/</li>
+</ul>
+<p>将下载好的主题包解压到这个目录，或者解压后拷贝到这个目录。</p>
+<ul>
+<li>Icons 图标：/usr/share/icons</li>
+</ul>
+<p>将下载好的 Icons 图标解压到这个目录，或者解压后拷贝到这个目录。</p>
+<ul>
+<li>鼠标图标：/usr/share/icons</li>
+</ul>
+<p>将下载好的鼠标图标解压到这个目录，或者解压后拷贝到这个目录。</p>
+<ul>
+<li>选择下载的壁纸图片，右键设置为壁纸即可。</li>
+</ul>
+<p>上面的操作一定要保证正确无误，接下来就可以选择这些主题包，并让其生效了。</p>
+<p><strong>打开 gnome-tweaks 工具，如下图：</strong></p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/a2f2db6d0cf84869880a3a747bc5623b_032faaab3fc945238.png" alt=""></p>
+<p>就可以开始自定义自己的ubuntu</p>
+<p>(这个部分详细可见：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/176977192" title="Ubuntu 20.04 桌面美化 - 知乎">Ubuntu 20.04 桌面美化 - 知乎</a> 我是主题的配置是按照这个大佬的来的)</p>
+<h3 id="2-oh-my-zsh的安装"><a href="#"></a>2.<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=oh-my-zsh&amp;spm=1001.2101.3001.7020">oh-my-zsh</a>的安装</h3>
+<p>说实话ubuntu自带的终端还是不够帅diao炸的所以我们玩的花一点，</p>
+<h4 id="zsh的安装"><a href="#"></a>zsh的安装</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 安装zsh</span><br><span class="line">sudo apt install zsh</span><br><span class="line"># 然后将zsh设置为默认shell：</span><br><span class="line">chsh -s /bin/zsh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>PS：</p>
+<ul>
+<li><code>echo $SHELL</code>: 可以通过<code>echo $SHELL</code>查看当前默认的shell，如果没有改为<code>/bin/zsh</code>，需要重启shell。</li>
+<li><code>cat /etc/shells</code>: 查看系统内已安装的shell</li>
+</ul>
+<h4 id="git的安装"><a href="#"></a>git的安装</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install git</span><br></pre></td></tr></table></figure>
+<h4 id="安装oh-my-zsh"><a href="#"></a>安装oh-my-zsh</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 方式一</span><br><span class="line">wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh</span><br><span class="line"># 方式二</span><br><span class="line">wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh</span><br><span class="line">bash ./install.sh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>安装后</p>
+<p>字体的安装，没有安装图形会出现乱码（别问我怎么知道的）</p>
+<p><strong>下载最新版本的符号字体和字体配置文件（下载好后直接点击文件安装就可）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf</span><br><span class="line">wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>powerline字体安装</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 下载</span><br><span class="line">git clone https://github.com/powerline/fonts.git</span><br><span class="line"> </span><br><span class="line"># 进入文件夹并安装</span><br><span class="line">cd fonts</span><br><span class="line">./install.sh</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>安装 Awesome-Terminal Fonts字体</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/gabrielelana/awesome-terminal-fonts.git</span><br><span class="line">cd awesome-terminal-fonts</span><br><span class="line">./install.sh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>安装nerd-fonts</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#下载</span><br><span class="line">git clone https://github.com/ryanoasis/nerd-fonts.git</span><br><span class="line">#安装同上</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>更新字体到缓存</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fc-cache -vf /usr/share/fonts</span><br><span class="line">#vf是你的个人字体路径需要寻找一下装在哪里</span><br><span class="line">#以下三个目录都是字体目录</span><br><span class="line"> </span><br><span class="line">#/usr/share/fonts</span><br><span class="line">#/usr/local/share/fonts</span><br><span class="line">#/home/&lt;username&gt;/.fonts&lt; ( &lt;username&gt;是你的用户名)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="要是还是出现错误的情况，可以直接打开终端"><a href="#"></a>要是还是出现错误的情况，可以直接打开终端</h4>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e67fce7d344a415c868f450843dfb0c4_50024374098648a99.png" alt=""></p>
+<p> 然后选择</p>
+<p> <img width="1200" height="428" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/7bccbad88403447fadb4977f3b4e13af_a8cef1d3c9614cd38.png" class="jop-noMdConv"></p>
+<p> 这个时候字会变得很丑，我们把自定义字体关掉就可以了啦</p>
+<p> <img width="1200" height="625" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/00466458ba5640c7863bc2ae21f2c900_4daf4731c45d47f48.png" class="jop-noMdConv"></p>
+<p> （这个地方我也没有搞的很明白，但是如果你的图形没办法像我一样正常显示估计就是字体问题可以自行百度poerline字体的安装方法）</p>
+<h4 id="配置oh-my-zsh主题"><a href="#"></a>配置oh-my-zsh主题</h4>
+<p>使用<code>sudo gedit ~/.zshrc</code>编辑<code>.zshrc</code>，将<code>ZSH_THEME</code>项改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZSH_THEME=&quot;agnoster&quot;</span><br></pre></td></tr></table></figure>
+<p>使用<code>source ~/.zshrc</code>命令更新。</p>
+<h4 id="oh-my-sh插件的安装"><a href="#"></a>oh-my-sh插件的安装</h4>
+<p>zsh-autosuggestions的安装（命令行命令键入时的历史命令建议插件）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/zsh-users/zsh-autosuggestions $&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;/plugins/zsh-autosuggestions</span><br></pre></td></tr></table></figure>
+<p>zsh-<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=syntax&amp;spm=1001.2101.3001.7020" title="syntax">syntax</a>-highlighting的安装（命令行语法高亮插件）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;/plugins/zsh-syntax-highlighting</span><br></pre></td></tr></table></figure>
+<p>主题的修改以及插件的安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">sudo gedit ~/.zshrc</span><br><span class="line"> </span><br><span class="line">#不是添加而是找到对对应的变量进行修改</span><br><span class="line">#修改主题：ZSH_THEME</span><br><span class="line"> </span><br><span class="line">ZSH_THEME=&quot;agnoster&quot;</span><br><span class="line">plugins=(</span><br><span class="line">	git zsh-autosuggestions zsh-syntax-highlighting</span><br><span class="line">)</span><br><span class="line">#修改插件</span><br><span class="line">plugins=(</span><br><span class="line">	git extract autojump zsh-autosuggestions zsh-syntax-highlighting</span><br><span class="line">)</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+<p>最后source  ~/.zshrc一下。</p>
+<h2 id="七-关于终端的美化"><a href="#"></a>七.关于终端的美化</h2>
+<p>可以看这个大佬的CSDN：<a target="_blank" rel="noopener" href="https://blog.csdn.net/zhangjiali12011/article/details/85533482" title="ubuntu下修改终端字体颜色以及terminator字体美化_zhangjiali12011的博客-CSDN博客_terminator 美化">ubuntu下修改终端字体颜色以及terminator字体美化_zhangjiali12011的博客-CSDN博客_terminator 美化</a></p>
+<p>ubuntu的安装基本到此结束，有什么问题或者错误欢迎私信我</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ubuntu/" rel="tag"># ubuntu</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/IOU%E5%92%8C%E4%BB%96%E4%BB%AC%E5%84%BF%E5%AD%90%E4%BB%AC/" rel="prev" title="IOU和他们儿子们">
+      <i class="fa fa-chevron-left"></i> IOU和他们儿子们
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/" rel="next" title="神经网络优化器">
+      神经网络优化器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+    
+  
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">穷苦人民如何用移动固态配置unbutu22.04</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-unbutu%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.</span> <span class="nav-text">一.unbutu系统的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%85%B3%E4%BA%8E%E8%AF%AD%E8%A8%80%E4%BB%A5%E5%8F%8A%E4%B8%AD%E6%96%87%E8%BE%93%E5%85%A5%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">二.关于语言以及中文输入法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89-%E7%BB%99ubuntu%E6%8D%A2%E6%BA%90"><span class="nav-number">1.3.</span> <span class="nav-text"> 三.给ubuntu换源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B-%E4%B8%8B%E8%BD%BD%E8%B0%B7%E6%AD%8C%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="nav-number">1.4.</span> <span class="nav-text">四.下载谷歌浏览器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%80%9A%E8%BF%87%E4%BD%BF%E7%94%A8Ctrl-Alt-T%E9%94%AE%E7%9B%98%E5%BF%AB%E6%8D%B7%E9%94%AE%E6%88%96%E5%8D%95%E5%87%BB%E7%BB%88%E7%AB%AF%E5%9B%BE%E6%A0%87%E6%9D%A5%E6%89%93%E5%BC%80%E7%BB%88%E7%AB%AF"><span class="nav-number">1.4.1.</span> <span class="nav-text">1.通过使用Ctrl+Alt+T键盘快捷键或单击终端图标来打开终端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E8%A3%85Google-Chrome"><span class="nav-number">1.4.2.</span> <span class="nav-text">2.安装Google Chrome</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94-%E5%BE%AE%E4%BF%A1%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.5.</span> <span class="nav-text">五.微信的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD-ubuntu%E7%95%8C%E9%9D%A2%E7%9A%84%E7%BE%8E%E5%8C%96"><span class="nav-number">1.6.</span> <span class="nav-text">六.ubuntu界面的美化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-gone%E7%BE%8E%E5%8C%96"><span class="nav-number">1.6.1.</span> <span class="nav-text">1.gone美化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-oh-my-zsh%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.2.</span> <span class="nav-text">2.oh-my-zsh的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#zsh%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.2.1.</span> <span class="nav-text">zsh的安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#git%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.2.2.</span> <span class="nav-text">git的安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85oh-my-zsh"><span class="nav-number">1.6.2.3.</span> <span class="nav-text">安装oh-my-zsh</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A6%81%E6%98%AF%E8%BF%98%E6%98%AF%E5%87%BA%E7%8E%B0%E9%94%99%E8%AF%AF%E7%9A%84%E6%83%85%E5%86%B5%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%E7%BB%88%E7%AB%AF"><span class="nav-number">1.6.2.4.</span> <span class="nav-text">要是还是出现错误的情况，可以直接打开终端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEoh-my-zsh%E4%B8%BB%E9%A2%98"><span class="nav-number">1.6.2.5.</span> <span class="nav-text">配置oh-my-zsh主题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#oh-my-sh%E6%8F%92%E4%BB%B6%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.2.6.</span> <span class="nav-text">oh-my-sh插件的安装</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83-%E5%85%B3%E4%BA%8E%E7%BB%88%E7%AB%AF%E7%9A%84%E7%BE%8E%E5%8C%96"><span class="nav-number">1.7.</span> <span class="nav-text">七.关于终端的美化</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YueSang"
+      src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+  <p class="site-author-name" itemprop="name">YueSang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/YueSangShuai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;YueSangShuai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/0102hanyue@gmail.com" title="E-Mail → 0102hanyue@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="">
+    <a target="_blank" class="social-link" href="/atom.xml" style="color: burlywood;">
+      <span class="icon">
+        <i class="fa fa-rss"></i>
+      </span>
+      <span class="label">RSS</span>
+    </a>
+  </div>
+
+
+    <div class="links-of-blogroll motion-element links-of-blogroll-block">
+        <div class="links-of-blogroll-title recent-posts-title">
+	    <i class="fa fa-history " aria-hidden="true"></i>
+            近期文章
+	</div>
+	<ul class="links-of-blogroll-list recent-posts-list">
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/" title="高斯函数的方差" target="">
+		    高斯函数的方差
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4/" title="向量空间" target="">
+		    向量空间
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E5%B9%B3%E6%96%B9%E7%9A%84%E6%9C%9F%E6%9C%9B/" title="高斯函数平方的期望" target="">
+		    高斯函数平方的期望
+		    </a>
+		</li>
+	</ul>
+    </div>
+
+
+
+	<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+	<div class="widget-wrap">
+		<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="300" height="300" id="resCanvas" style="width:100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOU/" rel="tag">IOU</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jeston-nx/" rel="tag">Jeston nx</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Openvino/" rel="tag">Openvino</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Yolo/" rel="tag">Yolo</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cuda/" rel="tag">cuda</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cudnn/" rel="tag">cudnn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv/" rel="tag">opencv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv-contrib/" rel="tag">opencv_contrib</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorrt/" rel="tag">tensorrt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/" rel="tag">交叉熵损失</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%98%E5%8C%96%E5%99%A8/" rel="tag">优化器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a><span class="tag-list-count">5</span></li></ul>
+			</canvas>
+		</div>
+	</div>
+
+
+      </div>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YueSang</span>
+</div>
+<script defer data-pjax src="/custom/js/footer/fish.js"></script>
+<link rel="stylesheet" href="/custom/css/footer/forter.css">
+<link rel="stylesheet" href="/custom/css/footer/fish_transparent.css">
+
+
+<script defer data-pjax src="/custom/js/footer/runtime.js"></script>
+<div id="runtime_border"></div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '30px',
+  right: 'unset',
+  left: '80px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'Ti1kR0paKsHBzpXZnrhRIx8g-gzGzoHsz',
+      appKey     : 'fmLUyLzUTPYCOpcwoBJqCcSz',
+      placeholder: "来了老弟",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,159 @@
+/* 主体 */
+body {
+  background: url("/images/background.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+/* 侧边栏按钮 */
+.sidebar-toggle{
+  width:23px;
+  bottom:45px;
+  left: 30px;
+  height: 23px;
+}
+
+/* 代码片段 */
+ .highlight-container{
+  border-radius: 15px; /* 圆角的半径 */
+  /* background: rgba(33, 97, 158, 0.603) */
+}
+
+.darkmode--activated .highlight-container{
+  border-radius: 15px; /* 圆角的半径 */
+  /* background: rgba(33, 97, 158, 0.603) */
+}
+
+/* 分类页图标 */
+.category-all-chart {
+  width: 50%; /* 设置宽度为200像素 */
+  height: 50%; /* 设置高度为100像素 */
+  margin-top: 5%; /* 添加上外边距，以创建距离上方元素的间距 */
+  /* 或者使用 margin-bottom 添加下外边距，以创建距离下方元素的间距 */
+}
+
+/* 标签页图表 */
+.tag-charts {
+  width: 100%; /* 设置宽度为200像素 */
+  height: 100%; /* 设置高度为100像素 */
+  margin-top: 5%; /* 添加上外边距，以创建距离上方元素的间距 */
+  /* 或者使用 margin-bottom 添加下外边距，以创建距离下方元素的间距 */
+}
+
+/* 标签页分类页填充 */
+.content.page.posts-expand{
+  padding: 0px;
+}
+
+/* 标签页数据获取 */
+.tagclouddata{
+  display: none;
+}
+
+/* 分类页标题 */
+.category-all-title {
+  text-align: center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 可选：如果需要垂直居中对齐，可以添加以下样式 */
+  flex-direction: column; /* 垂直居中时使用，使元素竖直排列 */
+}
+
+/* 文本设置 */
+.content {
+  /* font-size: 20px;  */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px; /* 圆角的半径 */
+}
+/* 文本设置黑夜模式 */
+.darkmode--activated .content {
+  /* font-size: 20px;  */
+  background: rgba(38, 121, 52, 0.2);
+  border-radius: 15px; /* 圆角的半径 */
+}
+
+
+/* 首页滚动播放设置 */
+#swiper_container {
+  background: rgba(201, 197, 197, 0.9);
+}
+
+.darkmode--activated #swiper_container {
+  background: rgba(75, 72, 72, 0.9);
+}
+
+
+/* 文章部分 */
+.post {
+   margin-top: 60px;
+   margin-bottom: 60px;
+   padding: 25px;
+   background: rgba(255,255,255,0.7);
+   border-radius: 15px; /* 圆角的半径 */
+}
+
+/* 文章部分黑夜 */
+.darkmode--activated .post {
+  /* 在这里定义暗黑模式下的样式 */
+  color: #ccc; /* 更改文本颜色以提高可读性 */
+  background: rgba(0,0,0,0.7);
+  border-radius: 15px; /* 圆角的半径 */
+}
+
+.posts-expand .post-title-link {
+  color: #000;
+}
+.posts-expand .post-meta-container {
+  color: #000;
+}
+/* 侧标栏 */
+.sidebar {
+  /* font-size: 20px;  */
+  opacity: 0.9;
+}
+.popup {
+  opacity: 0.8;
+}
+
+
+/* 标题 */
+.brand {
+  border-bottom: none;
+  background-color: rgba(255,255,255,0); /* 添加背景色，替换 "your-color" 为您想要的颜色值 */
+  color: #000 !important;
+  display: inline-block;
+  /* line-height: $font-size-title; */
+  padding: 0 40px;
+  position: relative;
+}
+
+
+.brand:hover {
+  color: rgba(33, 97, 158, 0.603);
+}
+
+/* 标题 */
+.darkmode--activated .brand {
+  border-bottom: none;
+  background-color: rgba(255,255,255,0); /* 添加背景色，替换 "your-color" 为您想要的颜色值 */
+  color: #ffffff !important;
+  display: inline-block;
+  /* line-height: $font-size-title; */
+  padding: 0 40px;
+  position: relative;
+}
+
+
+.darkmode--activated .brand:hover {
+  color: rgba(33, 97, 158, 0.603);
+}
+
+
+.archive-container {
+  /* keep-container(false, 0, 0, 30px, 30px); */
+  background: rgba(255,255,255,0.9);
+}

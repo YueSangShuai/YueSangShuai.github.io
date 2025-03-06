@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="mask-icon" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Serif Simplified Chinese:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-mac-osx.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yuesangshuai.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Openvino量化模型推理 Fp32 Fp16 int8 我忘记我是哪个版本的openvino了，这里记录一下我将模型从onnx转换到Openvino的Ir模型以及最后的int8,Openvino比Tensorrt的泛化性要高，Tensorrt的量化是模型放到不同的机子上面都需要重新量化一次但是Openvino没有这个缺点。 我的OpenVino采用的是源码编译的这里采用的是python代码，之">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Openvino量化模型推理 Fp32 Fp16 int8">
+<meta property="og:url" content="http://yuesangshuai.github.io/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="你好陌生人">
+<meta property="og:description" content="Openvino量化模型推理 Fp32 Fp16 int8 我忘记我是哪个版本的openvino了，这里记录一下我将模型从onnx转换到Openvino的Ir模型以及最后的int8,Openvino比Tensorrt的泛化性要高，Tensorrt的量化是模型放到不同的机子上面都需要重新量化一次但是Openvino没有这个缺点。 我的OpenVino采用的是源码编译的这里采用的是python代码，之">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/397c40c6ae4a4094a2e8dc88cda85f48_cbd8964035d941349.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/41d7baf4604c49d39d32700025ce258a_3e8eadeb2477454a9.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/9dbc17d300f143568c3c598f768cc605_dbe4da939502499a9.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bec68d6b955a4401bedf8d1c54e700c6_f4b0436799124d78a.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c25101469a364d8e9d8bea60f3dd3142_2ded076e1fd74ad0b.png">
+<meta property="article:published_time" content="2025-03-06T07:01:47.369Z">
+<meta property="article:modified_time" content="2025-03-06T07:01:47.369Z">
+<meta property="article:author" content="YueSang">
+<meta property="article:tag" content="Openvino">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/397c40c6ae4a4094a2e8dc88cda85f48_cbd8964035d941349.png">
+
+<link rel="canonical" href="http://yuesangshuai.github.io/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+
+<script type="text/javascript" src="/custom/js/head/love.js"></script>
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+<script type="text/javascript" src="/custom/js/head/fire.js"></script>
+
+
+<script type = "text/javascript" src="/custom/js/head/snow.js"></script>
+
+
+<script src="/live2d-widget/autoload.js"></script>
+
+
+<div id="catcat"></div>
+<link rel="stylesheet" href="/custom/css/head/cat.css">
+<script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script defer data-pjax src="/custom/js/head/cat.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/cursor.css">
+<script defer data-pjax src="/custom/js/head/cursor.js"></script>
+
+
+<span id="fps"></span> 
+<link rel="stylesheet" href="/custom/css/head/fps.css">
+<script src="/custom/js/head/fps.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/scorllbar.css">
+
+
+<link rel="stylesheet" href="/custom/css/body.css">
+
+
+<script defer data-pjax src="/custom/js/head/cursormove.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/funny_title.js"></script>
+
+
+<div id="scroll-buttons">
+  <button id="scroll-to-top">↑</button>
+  <button id="scroll-to-bottom">↓</button>
+</div>
+<script defer data-pjax src="/custom/js/head/topdown.js"></script>
+<link rel="stylesheet" href="/custom/css/head/topdown.css">
+
+
+<script defer data-pjax src="/custom/js/head/sun_moon.js"></script>
+<link rel="stylesheet" href="/custom/css/head/sun_moon.css">
+
+
+<script defer data-pjax src="/custom/js/head/tag-styles.js"></script>
+<link rel="stylesheet" href="/custom/css/head/tag-styles.css">
+
+
+<link rel="stylesheet" href="/custom/css/head/recent_post.css">
+
+<script defer data-pjax src="/custom/js/head/random_img_recent_post.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/category.css">
+
+
+
+<script defer data-pjax src="/custom/js/head/raydar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/bar.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/loading/default.css">
+<script defer data-pjax src="/custom/js/head/loading.js"></script>
+
+
+
+
+<script defer data-pjax src="/custom/js/head/code-unfloder.js"></script>
+<link rel="stylesheet" href="/custom/css/head/highlight.css">
+
+
+<script defer data-pjax src="/custom/js/head/SAO_Menu.js"></script>
+
+
+<script defer data-pjax src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/js/swiper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/css/swiper.min.css">
+<script defer data-pjax src="/custom/js/head/swiper_init.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <title>Openvino量化模型推理 Fp32 Fp16 int8 | 你好陌生人</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+<link rel="alternate" href="/atom.xml" title="你好陌生人" type="application/atom+xml">
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+
+  
+  
+  
+    <div id="loading-box">
+  <div class="SAO-scene">
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+  </div>
+</div>
+
+    <div class="pretype" id="default"></div>
+  
+
+
+<div id="SAO-back">
+  <div id="SAO-menu">
+    <div id="SAO-menu-content">
+            
+            <div class="utils-list">
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Tell</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">Anything can I help you ?</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-question-circle" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/guestbook/')},500);"></i>
+                    
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Menu</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">The menu of my blog</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-tasks" onclick="panelAudio();UtilsClick()"></i>
+                    
+                    
+                        
+                            
+                        
+                        <div class="menu-list" style="top:-143px;">
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-home" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/')},500);">Home</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="panelAudio();MenusClick()">Document</i>
+                            
+                            
+                                
+                                    
+                                
+
+                                <div class="menu-child" style="top:-40px;">
+                                
+                                    <div class="menu-list-child">
+                                    
+                                        <i class="fa fa-file-invoice" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/hexo%E9%85%8D%E7%BD%AE/')},500);">Beautify</i>
+                                    
+                                    </div>
+                                
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-archive" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/archives/')},500);">Archives</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/')},500);">Categoties</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-tags" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/tags/')},500);">Tags</i>
+                            
+                            
+                            </div>
+                        
+                        </div>
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">log out</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">log out</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-power-off" onclick="clickAudio();setTimeout(function(){SAOclose();SAOKeepOff()},500);"></i>
+                    
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">你好陌生人</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-book fa-fw"></i>guestbook</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yuesangshuai.github.io/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+      <meta itemprop="name" content="YueSang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="你好陌生人">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Openvino量化模型推理 Fp32 Fp16 int8
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-06 15:01:47" itemprop="dateCreated datePublished" datetime="2025-03-06T15:01:47+08:00">2025-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">环境配置</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/" class="post-meta-item leancloud_visitors" data-flag-title="Openvino量化模型推理 Fp32 Fp16 int8" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+<section class="main-hero-waves-area waves-area">
+  <svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path>
+    </defs>
+    <g class="parallax">
+      <use href="#gentle-wave" x="48" y="0"></use>
+      <use href="#gentle-wave" x="48" y="3"></use>
+      <use href="#gentle-wave" x="48" y="5"></use>
+      <use href="#gentle-wave" x="48" y="7"></use>
+    </g>
+  </svg>
+</section>
+<link rel="stylesheet" href="/custom/css/post-meta/wave.css">
+
+
+<link rel="stylesheet" href="/custom/css/post-meta/fengche.css">
+
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>Openvino量化模型推理 Fp32 Fp16 int8</h1>
+<p>我忘记我是哪个版本的<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=openvino&amp;spm=1001.2101.3001.7020">openvino</a>了，这里记录一下我将模型从onnx转换到Openvino的Ir模型以及最后的int8,Openvino比Tensorrt的泛化性要高，Tensorrt的量化是模型放到不同的机子上面都需要重新量化一次但是Openvino没有这个缺点。</p>
+<p>我的OpenVino采用的是源码编译的这里采用的是python代码，之后可能会写一份C++代码放上去,先上才艺</p>
+<h2 id="一-将模型转换成onnx模型"><a href="#"></a>一.将模型转换成<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=onnx%E6%A8%A1%E5%9E%8B&amp;spm=1001.2101.3001.7020">onnx模型</a></h2>
+<p>这里我采用的是pytorch模型文件转成onnx</p>
+<p>模型结构包括参数保存</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">import torch</span><br><span class="line">import torch.nn</span><br><span class="line">import os</span><br><span class="line">import sys</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">def export(model_path):</span><br><span class="line">    net = torch.load(</span><br><span class="line">        model_path,</span><br><span class="line">        map_location=torch.device(&#x27;cpu&#x27;),</span><br><span class="line">    )</span><br><span class="line">    net.eval()</span><br><span class="line">    #这里需要指定你输入和输出的名字方便后面推理</span><br><span class="line">    input_names = [&#x27;input&#x27;]</span><br><span class="line">    output_names = [&#x27;output&#x27;]</span><br><span class="line">    #这里需要确定模型的输入</span><br><span class="line">    x = torch.randn(1, 3, 224, 224)</span><br><span class="line"> </span><br><span class="line">    torch.onnx.export(</span><br><span class="line">        net,</span><br><span class="line">        x,</span><br><span class="line">        os.path.join(</span><br><span class="line">            os.path.split(model_path)[0],</span><br><span class="line">            &#x27;best.onnx&#x27;,</span><br><span class="line">        ),</span><br><span class="line">        input_names=input_names,</span><br><span class="line">        output_names=output_names,</span><br><span class="line">        verbose=False,</span><br><span class="line">        opset_version=12,</span><br><span class="line">    )</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    model_path = &#x27;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/best.pt&#x27;</span><br><span class="line">    export(model_path)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>模型采用字典保存</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">import torch</span><br><span class="line">from swin_transformer import *</span><br><span class="line">from collections import OrderedDict</span><br><span class="line"> </span><br><span class="line">DROP_PATH_RATE = 0.5</span><br><span class="line">EMBED_DIM = 192</span><br><span class="line">DEPTHS = [2, 2, 18, 2]</span><br><span class="line">NUM_HEADS = [6, 12, 24, 48]</span><br><span class="line">WINDOW_SIZE = 7</span><br><span class="line"> </span><br><span class="line">model_path = &#x27;&#x27;</span><br><span class="line"> </span><br><span class="line">checkpoint = torch.load(</span><br><span class="line">    model_path,</span><br><span class="line">    map_location=&#x27;cpu&#x27;,</span><br><span class="line">)</span><br><span class="line">model = SwinTransformer(</span><br><span class="line">    img_size=224,</span><br><span class="line">    patch_size=4,</span><br><span class="line">    in_chans=3,</span><br><span class="line">    num_classes=0,</span><br><span class="line">    embed_dim=EMBED_DIM,</span><br><span class="line">    depths=DEPTHS,</span><br><span class="line">    num_heads=NUM_HEADS,</span><br><span class="line">    window_size=WINDOW_SIZE,</span><br><span class="line">    mlp_ratio=4,</span><br><span class="line">    qkv_bias=True,</span><br><span class="line">    qk_scale=None,</span><br><span class="line">    drop_rate=0.0,</span><br><span class="line">    drop_path_rate=DROP_PATH_RATE,</span><br><span class="line">    ape=False,</span><br><span class="line">    patch_norm=True,</span><br><span class="line">)</span><br><span class="line"> </span><br><span class="line">new_state_dict = OrderedDict()</span><br><span class="line">for k, v in checkpoint[&#x27;model&#x27;].items():</span><br><span class="line">    if k != &#x27;head.weight&#x27;:</span><br><span class="line">        new_state_dict[k] = v</span><br><span class="line">    else:</span><br><span class="line">        print(k, v.shape)</span><br><span class="line">model.load_state_dict(new_state_dict, strict=False)</span><br><span class="line"> </span><br><span class="line">model.eval()</span><br><span class="line"> </span><br><span class="line">input_names = [&#x27;input&#x27;]</span><br><span class="line">output_names = [&#x27;output&#x27;]</span><br><span class="line">x = torch.randn(1, 3, 224, 224)</span><br><span class="line"> </span><br><span class="line">torch.onnx.export(</span><br><span class="line">    model,</span><br><span class="line">    x,</span><br><span class="line">    os.path.join(</span><br><span class="line">        os.path.split(model_path)[0],</span><br><span class="line">        &#x27;best.onnx&#x27;,</span><br><span class="line">    ),</span><br><span class="line">    input_names=input_names,</span><br><span class="line">    output_names=output_names,</span><br><span class="line">    verbose=False,</span><br><span class="line">    opset_version=12,</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>总结来说就是把字典导入到模型的结构里面然后在进行onnx的转换这部分可以自己网上找找教程听多的</p>
+<h2 id="二-模型从onnx模型转ir模型"><a href="#"></a>二.模型从onnx模型转ir模型</h2>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/397c40c6ae4a4094a2e8dc88cda85f48_cbd8964035d941349.png" alt=""></p>
+<p> 这里如果你是用python直接pip的话可以直接进入conda的环境去使用她，如果你是源码编译OpenVino的话可能要进入那个目录下载一下，这里我个人觉得如果你只是用来测试的话Python其实就很够用了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python mo_onnx.py --input_model &lt;输入模型路经&gt; --output_dir &lt;输出模型路经&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>（如果需要量化到FP16的话需要额外指定参数 --compress_to_fp16）</strong></p>
+<p>首先先将你的模型转换到Ir格式，这里放一下mo的参数你们可以有道翻译一下我个人英语不太好这里就不解释了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mo -h #可以查看mo的参数</span><br><span class="line">#或者是进入到mo.py所在的文件夹然后</span><br><span class="line">python mo.py -h</span><br></pre></td></tr></table></figure>
+<p> 之后测试一下转换完的模型推理速度</p>
+<p>进入Openvino这个文件夹</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/41d7baf4604c49d39d32700025ce258a_3e8eadeb2477454a9.png" alt=""></p>
+<p> 然后查看一下你模型量化的结果（FP32）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python ./benchmark_app.py -m &lt;量化后的xml文件&gt; -d CPU -api async -i &lt;选择图片路径&gt; -b 1</span><br></pre></td></tr></table></figure>
+<p>其中 <strong>-d</strong>指定的是你的设备 -api指定的是你的推理模式（同步还是异步推理）</p>
+<p>看一下FP32模型的速度</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/9dbc17d300f143568c3c598f768cc605_dbe4da939502499a9.png" alt=""></p>
+<p> FP16</p>
+<img width="598" height="240" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bec68d6b955a4401bedf8d1c54e700c6_f4b0436799124d78a.png" class="jop-noMdConv">
+<p> ONNX模型推理速度</p>
+<img width="870" height="240" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c25101469a364d8e9d8bea60f3dd3142_2ded076e1fd74ad0b.png" class="jop-noMdConv">
+<h2 id="三，Int8量化"><a href="#"></a> 三，<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Int8&amp;spm=1001.2101.3001.7020">Int8</a>量化</h2>
+<p>在转换之前，我们需要准备一下数据（在量化过程中会使用到）。对于自己的数据集首先转换成openvino支持的数据格式，这里使用imagenet数据集格式，对于分类任务需要annotation.txt文件以及labels.txt共两个文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">├── dataset:： 存放数据集的根目录</span><br><span class="line">│     ├── 1：         </span><br><span class="line">│     ├── 2：     </span><br><span class="line">│     ├── 3：         </span><br><span class="line">│     ├── 4：    </span><br><span class="line">│     └── .... ：              </span><br></pre></td></tr></table></figure>
+<p>这里给一个生成annotation.txt和labels.txt脚本（霹雳趴拉导师那边抄的）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">import glob</span><br><span class="line"> </span><br><span class="line">image_dir = &quot;/your_dataset_dir&quot;</span><br><span class="line">assert os.path.exists(image_dir), &quot;image dir does not exist...&quot;</span><br><span class="line"> </span><br><span class="line">img_list = glob.glob(os.path.join(image_dir, &quot;*&quot;, &quot;*.jpg&quot;))</span><br><span class="line">assert len(img_list) &gt; 0, &quot;No images(.jpg) were found in image dir...&quot;</span><br><span class="line"> </span><br><span class="line">classes_info = os.listdir(image_dir)</span><br><span class="line">classes_info.sort()</span><br><span class="line">classes_dict = &#123;&#125;</span><br><span class="line"> </span><br><span class="line"># create label file</span><br><span class="line">with open(&quot;my_labels.txt&quot;, &quot;w&quot;) as lw:</span><br><span class="line">    # 注意，没有背景时，index要从0开始</span><br><span class="line">    for index, c in enumerate(classes_info, start=0):</span><br><span class="line">        txt = &quot;&#123;&#125;:&#123;&#125;&quot;.format(index, c)</span><br><span class="line">        if index != len(classes_info):</span><br><span class="line">            txt += &quot;\n&quot;</span><br><span class="line">        lw.write(txt)</span><br><span class="line">        classes_dict.update(&#123;c: str(index)&#125;)</span><br><span class="line">print(&quot;create my_labels.txt successful...&quot;)</span><br><span class="line"> </span><br><span class="line"># create annotation file</span><br><span class="line">with open(&quot;my_annotation.txt&quot;, &quot;w&quot;) as aw:</span><br><span class="line">    for img in img_list:</span><br><span class="line">        img_classes = classes_dict[img.split(&quot;/&quot;)[-2]]</span><br><span class="line">        txt = &quot;&#123;&#125; &#123;&#125;&quot;.format(img, img_classes)</span><br><span class="line">        if index != len(img_list):</span><br><span class="line">            txt += &quot;\n&quot;</span><br><span class="line">        aw.write(txt)</span><br><span class="line">print(&quot;create my_annotation.txt successful...&quot;)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="3-1-模型测试"><a href="#"></a>3.1 模型测试</h3>
+<p>首先先测试FP32和FP16的模型精度，先准备一份yaml文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">models:</span><br><span class="line">  - name: mobileNetV3Fp32</span><br><span class="line">    launchers:</span><br><span class="line">      #下面指定运行的框架 dlsdk就是openvino， 也可以是tensorflow或者其他框架</span><br><span class="line">      #model/weights是要测试的模型文件名</span><br><span class="line">      #adapter是告诉accuracy checker模型的输出是目标分类还是目标识别或者其他的输出</span><br><span class="line">      - framework: openvino</span><br><span class="line">        model: /home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml</span><br><span class="line">        weights: /home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin</span><br><span class="line">        adapter: classification</span><br><span class="line"> </span><br><span class="line">    datasets:</span><br><span class="line">      #下面这部分是有关数据集的路径，数据集的格式(imagenet，VOC或者其他)以及标注文件的名字</span><br><span class="line">      - name: Flower</span><br><span class="line">        data_source: /mnt/hdd-4t/data/hanyue/mobileNet/flower</span><br><span class="line">        annotation_conversion:</span><br><span class="line">          converter: imagenet</span><br><span class="line">          annotation_file: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/my_annotation.txt&quot;</span><br><span class="line">        #预处理告诉ac_checker工具在把数据集图片送进模型前要做那些预处理，比如缩放，剪切或者调整RGB/BGR顺序之类</span><br><span class="line">        reader: opencv_imread # default setting</span><br><span class="line">        preprocessing:</span><br><span class="line">          - type: resize</span><br><span class="line">            size: 256</span><br><span class="line">            aspect_ratio_scale: greater</span><br><span class="line">          - type: crop</span><br><span class="line">            size: 224</span><br><span class="line">          - type: bgr_to_rgb # bgr format in opencv</span><br><span class="line">          - type: normalization</span><br><span class="line">            # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well</span><br><span class="line">            mean: (123.675, 116.28, 103.53)</span><br><span class="line">            std: (58.395, 57.12, 57.375)</span><br><span class="line">        #这里定义统计准确度用的算法，这里要看2种准确度，一个是top1的，还一个是top5的</span><br><span class="line">        metrics:</span><br><span class="line">          - name: accuracy @ top1</span><br><span class="line">            type: accuracy</span><br><span class="line">            top_k: 1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>model：存放你的xml的路径，在精度测试中可以先不用放weight,这个model也可以是你的onnx文件</p>
+<p>adapter:选择你的网络类型我这里是分类网络，openvino还支持目标检测网络具体可以看看config下面的配置</p>
+<p>datasource:下面存放的是你的数据集的根路径（这里有个坑就是这个文件夹下面存放的图片路径要和你上面生成的annotion.txt对应起来包括你的类别还有路径，相当于就是你把你数据集所有的图片全部放在这个路径下面，验证的时候由annotion.txt里面的东西验证）</p>
+<p>convert:我直接写imagenet没有什么影响</p>
+<p>preprocessing：里面的是写的是你预处理操作（记得颜色通道的转换不然的话精确度一直和训练的时候验证都是错的）这里有的预处理很傻逼我官网也没有找到如果有人找到的话欢迎评论区和我说一声哈哈哈哈哈</p>
+<p> metrics:定义的是评价指标这里是分类网络所以我采用的是accuary这里的top1表示，评分排名前1中能正确分出的概率。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accuracy_check -c 你的yaml文件 -s ./ -td CPU</span><br></pre></td></tr></table></figure>
+<p>可以得到正确率了，之后int8量化也需要用到这个进行评估。</p>
+<h3 id="3-2-yaml文件以及json文件的准备"><a href="#"></a>3.2.yaml文件以及json文件的准备</h3>
+<p>这里int8有两种量化方式一种是全int8量化还有一种是混精度量化首先先准备一下model.yaml文件</p>
+<p>这里的yaml文件和刚刚那个yaml文件大差不差</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">models:</span><br><span class="line">  - name: mobileNetV3</span><br><span class="line">    launchers:</span><br><span class="line">      - framework: dlsdk</span><br><span class="line">        device: CPU</span><br><span class="line">        adapter: classification</span><br><span class="line">    #定义数据集</span><br><span class="line">    datasets:</span><br><span class="line">      - name: classification_dataset</span><br><span class="line">        #定义数据集路径</span><br><span class="line">        data_source: /mnt/hdd-4t/data/hanyue/mobileNet/flower</span><br><span class="line">        #定义annotation路径</span><br><span class="line">        annotation_conversion:</span><br><span class="line">          converter: imagenet</span><br><span class="line">          annotation_file: /home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/my_annotation.txt</span><br><span class="line"> </span><br><span class="line">        reader: opencv_imread # default setting</span><br><span class="line">        #这里需要提前定义预处理</span><br><span class="line">        preprocessing:</span><br><span class="line">          - type: resize</span><br><span class="line">            size: 256</span><br><span class="line">            aspect_ratio_scale: greater</span><br><span class="line">          - type: crop</span><br><span class="line">            size: 224</span><br><span class="line">          - type: bgr_to_rgb # bgr format in opencv</span><br><span class="line">          - type: normalization</span><br><span class="line">            # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well</span><br><span class="line">            mean: (123.675, 116.28, 103.53)</span><br><span class="line">            std: (58.395, 57.12, 57.375)</span><br><span class="line">        metrics:</span><br><span class="line">          - name: accuracy @ top1</span><br><span class="line">            type: accuracy</span><br><span class="line">            top_k: 1</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后就是json文件的编写</p>
+<h4 id="3-2-1-DefaultQuantization"><a href="#"></a>3.2.1 DefaultQuantization</h4>
+<p>这个应该是openvino中的全int8的量化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">        &quot;model_name&quot;: &quot;MobileNetV3&quot;, </span><br><span class="line">        &quot;model&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml&quot;, </span><br><span class="line">        &quot;weights&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin&quot; </span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;engine&quot;: &#123;</span><br><span class="line">        &quot;config&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/defualtQuantization/model.yaml&quot;</span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;compression&quot;: &#123;</span><br><span class="line">        &quot;target_device&quot;: &quot;CPU&quot;, </span><br><span class="line">                                </span><br><span class="line">        &quot;algorithms&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;name&quot;: &quot;DefaultQuantization&quot;, </span><br><span class="line">                &quot;params&quot;: &#123;</span><br><span class="line">                    &quot;preset&quot;: &quot;performance&quot;,                      </span><br><span class="line">                    &quot;stat_subset_size&quot;: 300  </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>model：里面定义的是你最开始量化后的xml和bin的路径以及指定你的设备</p>
+<p>engine:就是你刚刚写好的yaml文件了</p>
+<p>target_device：就是你要量化的设备</p>
+<p>algorithms –</p>
+<p>                        name：这里指定的是你的量化方式</p>
+<p>                        preset：我也不知道什么意思</p>
+<p>                        stat_subset_size: 好像是采取多少张数据集的意思</p>
+<h4 id="3-2-2-AccuracyAwareQuantization"><a href="#"></a>3.2.2 AccuracyAwareQuantization</h4>
+<p>先放一下json文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">        &quot;model_name&quot;: &quot;MobileNetV3&quot;, </span><br><span class="line">        &quot;model&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml&quot;, </span><br><span class="line">        &quot;weights&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin&quot; </span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;engine&quot;: &#123;</span><br><span class="line">        &quot;config&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/AccuracyAwareQuantization/model.yaml&quot;</span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;compression&quot;: &#123;</span><br><span class="line">        &quot;target_device&quot;: &quot;CPU&quot;, </span><br><span class="line">                                </span><br><span class="line">        &quot;algorithms&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;name&quot;: &quot;AccuracyAwareQuantization&quot;, </span><br><span class="line">                &quot;params&quot;: &#123;</span><br><span class="line">                    &quot;preset&quot;: &quot;performance&quot;,                      </span><br><span class="line">                    &quot;stat_subset_size&quot;: 300  ,</span><br><span class="line">                    &quot;maximal_drop&quot;: 0.1 </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>想比于DefaultQuantization就是name里面那个不一样以及多了一个maximal_drop,这个参数的意义是运行你的模型下降多少指标</p>
+<p>准确度的测试脚本可以用我3.1讲到的那个部分来测试只要把模型替换掉就OK了</p>
+<p>但是Openvino的量化好像只支撑分类网络和目标检测，后续找个时间写一下有关Pytorch自带的QAT的量化方法</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Openvino/" rel="tag"># Openvino</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/06/Openvino/Ubuntu19%20Openvion%20cmake%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91_cmake%20%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAopenvino%E9%A1%B9%E7%9B%AE-C/" rel="prev" title="Ubuntu19 Openvion cmake源码编译">
+      <i class="fa fa-chevron-left"></i> Ubuntu19 Openvion cmake源码编译
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/hexo%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/hexo%20next%E4%B8%BB%E9%A2%98%E9%AD%94%E6%94%B9/" rel="next" title="hexo next魔改">
+      hexo next魔改 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+    
+  
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">Openvino量化模型推理 Fp32 Fp16 int8</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%B0%86%E6%A8%A1%E5%9E%8B%E8%BD%AC%E6%8D%A2%E6%88%90onnx%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.1.</span> <span class="nav-text">一.将模型转换成onnx模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E6%A8%A1%E5%9E%8B%E4%BB%8Eonnx%E6%A8%A1%E5%9E%8B%E8%BD%ACir%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">二.模型从onnx模型转ir模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%EF%BC%8CInt8%E9%87%8F%E5%8C%96"><span class="nav-number">1.3.</span> <span class="nav-text"> 三，Int8量化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%A8%A1%E5%9E%8B%E6%B5%8B%E8%AF%95"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 模型测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-yaml%E6%96%87%E4%BB%B6%E4%BB%A5%E5%8F%8Ajson%E6%96%87%E4%BB%B6%E7%9A%84%E5%87%86%E5%A4%87"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2.yaml文件以及json文件的准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-1-DefaultQuantization"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">3.2.1 DefaultQuantization</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-2-AccuracyAwareQuantization"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">3.2.2 AccuracyAwareQuantization</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YueSang"
+      src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+  <p class="site-author-name" itemprop="name">YueSang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/YueSangShuai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;YueSangShuai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/0102hanyue@gmail.com" title="E-Mail → 0102hanyue@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="">
+    <a target="_blank" class="social-link" href="/atom.xml" style="color: burlywood;">
+      <span class="icon">
+        <i class="fa fa-rss"></i>
+      </span>
+      <span class="label">RSS</span>
+    </a>
+  </div>
+
+
+    <div class="links-of-blogroll motion-element links-of-blogroll-block">
+        <div class="links-of-blogroll-title recent-posts-title">
+	    <i class="fa fa-history " aria-hidden="true"></i>
+            近期文章
+	</div>
+	<ul class="links-of-blogroll-list recent-posts-list">
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/" title="高斯函数的方差" target="">
+		    高斯函数的方差
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4/" title="向量空间" target="">
+		    向量空间
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E5%B9%B3%E6%96%B9%E7%9A%84%E6%9C%9F%E6%9C%9B/" title="高斯函数平方的期望" target="">
+		    高斯函数平方的期望
+		    </a>
+		</li>
+	</ul>
+    </div>
+
+
+
+	<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+	<div class="widget-wrap">
+		<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="300" height="300" id="resCanvas" style="width:100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOU/" rel="tag">IOU</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jeston-nx/" rel="tag">Jeston nx</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Openvino/" rel="tag">Openvino</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Yolo/" rel="tag">Yolo</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cuda/" rel="tag">cuda</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cudnn/" rel="tag">cudnn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv/" rel="tag">opencv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv-contrib/" rel="tag">opencv_contrib</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorrt/" rel="tag">tensorrt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/" rel="tag">交叉熵损失</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%98%E5%8C%96%E5%99%A8/" rel="tag">优化器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a><span class="tag-list-count">5</span></li></ul>
+			</canvas>
+		</div>
+	</div>
+
+
+      </div>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YueSang</span>
+</div>
+<script defer data-pjax src="/custom/js/footer/fish.js"></script>
+<link rel="stylesheet" href="/custom/css/footer/forter.css">
+<link rel="stylesheet" href="/custom/css/footer/fish_transparent.css">
+
+
+<script defer data-pjax src="/custom/js/footer/runtime.js"></script>
+<div id="runtime_border"></div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '30px',
+  right: 'unset',
+  left: '80px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'Ti1kR0paKsHBzpXZnrhRIx8g-gzGzoHsz',
+      appKey     : 'fmLUyLzUTPYCOpcwoBJqCcSz',
+      placeholder: "来了老弟",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+    </div>
+</body>
+</html>

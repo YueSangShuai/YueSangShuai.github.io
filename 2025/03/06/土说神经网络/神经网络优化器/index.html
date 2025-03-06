@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="mask-icon" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Serif Simplified Chinese:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-mac-osx.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yuesangshuai.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="优化器 1.神经网络的梯度 1.1梯度 下面是如何求解导数 $$ \frac{df(x)}{dx}&#x3D;\lim\limits_{x\rightarrow\infty}\frac{f(x+h)-f(x)}{h} $$ 举个例子速度的导数是加速反应了速度变换的快慢，所以在神经网络中导数往往决定方向下降的快慢。 下面是一个偏导数 $$ f(x_0,x_1)&#x3D;x_0^2+x_1^2 $$ 可以将神经网络中的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络优化器">
+<meta property="og:url" content="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/index.html">
+<meta property="og:site_name" content="你好陌生人">
+<meta property="og:description" content="优化器 1.神经网络的梯度 1.1梯度 下面是如何求解导数 $$ \frac{df(x)}{dx}&#x3D;\lim\limits_{x\rightarrow\infty}\frac{f(x+h)-f(x)}{h} $$ 举个例子速度的导数是加速反应了速度变换的快慢，所以在神经网络中导数往往决定方向下降的快慢。 下面是一个偏导数 $$ f(x_0,x_1)&#x3D;x_0^2+x_1^2 $$ 可以将神经网络中的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_16921678799643.png">
+<meta property="article:published_time" content="2025-03-06T07:01:47.373Z">
+<meta property="article:modified_time" content="2025-03-06T07:01:47.384Z">
+<meta property="article:author" content="YueSang">
+<meta property="article:tag" content="优化器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_16921678799643.png">
+
+<link rel="canonical" href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+
+<script type="text/javascript" src="/custom/js/head/love.js"></script>
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+<script type="text/javascript" src="/custom/js/head/fire.js"></script>
+
+
+<script type = "text/javascript" src="/custom/js/head/snow.js"></script>
+
+
+<script src="/live2d-widget/autoload.js"></script>
+
+
+<div id="catcat"></div>
+<link rel="stylesheet" href="/custom/css/head/cat.css">
+<script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script defer data-pjax src="/custom/js/head/cat.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/cursor.css">
+<script defer data-pjax src="/custom/js/head/cursor.js"></script>
+
+
+<span id="fps"></span> 
+<link rel="stylesheet" href="/custom/css/head/fps.css">
+<script src="/custom/js/head/fps.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/scorllbar.css">
+
+
+<link rel="stylesheet" href="/custom/css/body.css">
+
+
+<script defer data-pjax src="/custom/js/head/cursormove.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/funny_title.js"></script>
+
+
+<div id="scroll-buttons">
+  <button id="scroll-to-top">↑</button>
+  <button id="scroll-to-bottom">↓</button>
+</div>
+<script defer data-pjax src="/custom/js/head/topdown.js"></script>
+<link rel="stylesheet" href="/custom/css/head/topdown.css">
+
+
+<script defer data-pjax src="/custom/js/head/sun_moon.js"></script>
+<link rel="stylesheet" href="/custom/css/head/sun_moon.css">
+
+
+<script defer data-pjax src="/custom/js/head/tag-styles.js"></script>
+<link rel="stylesheet" href="/custom/css/head/tag-styles.css">
+
+
+<link rel="stylesheet" href="/custom/css/head/recent_post.css">
+
+<script defer data-pjax src="/custom/js/head/random_img_recent_post.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/category.css">
+
+
+
+<script defer data-pjax src="/custom/js/head/raydar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/bar.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/loading/default.css">
+<script defer data-pjax src="/custom/js/head/loading.js"></script>
+
+
+
+
+<script defer data-pjax src="/custom/js/head/code-unfloder.js"></script>
+<link rel="stylesheet" href="/custom/css/head/highlight.css">
+
+
+<script defer data-pjax src="/custom/js/head/SAO_Menu.js"></script>
+
+
+<script defer data-pjax src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/js/swiper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/css/swiper.min.css">
+<script defer data-pjax src="/custom/js/head/swiper_init.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <title>神经网络优化器 | 你好陌生人</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+<link rel="alternate" href="/atom.xml" title="你好陌生人" type="application/atom+xml">
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+
+  
+  
+  
+    <div id="loading-box">
+  <div class="SAO-scene">
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+  </div>
+</div>
+
+    <div class="pretype" id="default"></div>
+  
+
+
+<div id="SAO-back">
+  <div id="SAO-menu">
+    <div id="SAO-menu-content">
+            
+            <div class="utils-list">
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Tell</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">Anything can I help you ?</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-question-circle" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/guestbook/')},500);"></i>
+                    
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Menu</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">The menu of my blog</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-tasks" onclick="panelAudio();UtilsClick()"></i>
+                    
+                    
+                        
+                            
+                        
+                        <div class="menu-list" style="top:-143px;">
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-home" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/')},500);">Home</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="panelAudio();MenusClick()">Document</i>
+                            
+                            
+                                
+                                    
+                                
+
+                                <div class="menu-child" style="top:-40px;">
+                                
+                                    <div class="menu-list-child">
+                                    
+                                        <i class="fa fa-file-invoice" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/hexo%E9%85%8D%E7%BD%AE/')},500);">Beautify</i>
+                                    
+                                    </div>
+                                
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-archive" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/archives/')},500);">Archives</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/')},500);">Categoties</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-tags" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/tags/')},500);">Tags</i>
+                            
+                            
+                            </div>
+                        
+                        </div>
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">log out</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">log out</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-power-off" onclick="clickAudio();setTimeout(function(){SAOclose();SAOKeepOff()},500);"></i>
+                    
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">你好陌生人</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-book fa-fw"></i>guestbook</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+      <meta itemprop="name" content="YueSang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="你好陌生人">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          神经网络优化器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-06 15:01:47" itemprop="dateCreated datePublished" datetime="2025-03-06T15:01:47+08:00">2025-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">神经网络</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/" class="post-meta-item leancloud_visitors" data-flag-title="神经网络优化器" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%E5%99%A8/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+<section class="main-hero-waves-area waves-area">
+  <svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path>
+    </defs>
+    <g class="parallax">
+      <use href="#gentle-wave" x="48" y="0"></use>
+      <use href="#gentle-wave" x="48" y="3"></use>
+      <use href="#gentle-wave" x="48" y="5"></use>
+      <use href="#gentle-wave" x="48" y="7"></use>
+    </g>
+  </svg>
+</section>
+<link rel="stylesheet" href="/custom/css/post-meta/wave.css">
+
+
+<link rel="stylesheet" href="/custom/css/post-meta/fengche.css">
+
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>优化器</h1>
+<h2 id="1-神经网络的梯度">1.神经网络的梯度</h2>
+<h3 id="1-1梯度">1.1梯度</h3>
+<p>下面是如何求解导数</p>
+<p>$$<br>
+\frac{df(x)}{dx}=\lim\limits_{x\rightarrow\infty}\frac{f(x+h)-f(x)}{h}<br>
+$$</p>
+<p>举个例子速度的导数是加速反应了速度变换的快慢，所以在神经网络中导数往往决定方向下降的快慢。<br>
+下面是一个偏导数</p>
+<p>$$<br>
+f(x_0,x_1)=x_0^2+x_1^2<br>
+$$</p>
+<p>可以将神经网络中的神经元理解为这些自变量，而梯度则是对这些自变量求导，我们将他称之为偏导数（求哪个自变量就是对他比较偏心），这些偏导数称之为模型的梯度。</p>
+<h3 id="1-2梯度法">1.2梯度法</h3>
+<p>根据高中学习的知识可以知道，函数的极值出现在导数为0的部分，也就是梯度为0的部分。函数可能有多个极值点由此可见梯度下降可能会出现的一个就是局部最优解。<br>
+<img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_16921678799643.png" alt=""><br>
+梯度法的过程就是土话来说，我先确认一个方向向前跑几步，然后再求梯度之后再跑几步，其中这个具体跑几步就要由我们的学习率来决定了。<br>
+给出梯度下降的公式：<br>
+$$<br>
+x_0=x_0-\eta\dfrac{\partial f}{\partial x_0}<br>
+$$<br>
+$$<br>
+x_1=x_1-\eta\dfrac{\partial f}{\partial x_1}<br>
+$$<br>
+其中$\eta$就是神经网络中的学习率</p>
+<h2 id="2神经网络动量">2神经网络动量</h2>
+<h3 id="2-1一阶动量和二阶动量">2.1一阶动量和二阶动量</h3>
+<p>通过高中物理知识可以知道动量的概念是物体在它运动方向上保持运动的趋势，是该物体质量和速度的乘积。土话来举个例子，孙策开大下船的时候船会往我们指定方向运动这就是动量。<br>
+一阶动量为过去各个时刻梯度的线性组合，而二阶动量自然是过去各个时刻梯度的平方的线性组合，虽然一阶动量确认梯度下降的路程，二阶动量确认梯度下降的速度。。<br>
+动量法的一般形式,先确定梯度：<br>
+$$<br>
+g_t=\nabla loss=\dfrac{\partial loss}{\partial \omega_t}<br>
+$$<br>
+这就和我上述讲的损失函数差不多对损失函数的每个权重求偏导的出来的就是权重。<br>
+这俩是一阶动量和二阶动量的表达式<br>
+$$<br>
+m_{t}=\phi\left(g_{1}, g_{2}, \cdots, g_{t}\right) ; V_{t}=\psi\left(g_{1}, g_{2}, \cdots, g_{t}\right)<br>
+$$<br>
+当前时刻下降的梯度<br>
+$$<br>
+\eta_t=\alpha·\dfrac{m_t}{\sqrt{V_t}}<br>
+$$<br>
+根据下降的梯度进行更新<br>
+$$<br>
+\omega_{t+1}= \omega_t-\eta_t<br>
+$$</p>
+<h3 id="2-2-一阶矩和二阶矩">2.2 一阶矩和二阶矩</h3>
+<p>假设梯度$g$是个随机变量，他的一阶矩就是他的期望，二阶矩就是方差（根据概率统计的定义得到的，高阶矩的目的就是为了验证概率$p(x)$是否随着x的增大而变小）</p>
+<h3 id="2-3-动量法">2.3 动量法</h3>
+<p>首先动量法的表达式如下：<br>
+$$<br>
+\eta_{t}=\gamma \eta_{t-1}+\alpha g_{t}<br>
+$$<br>
+$$<br>
+w_{t+1}=w_{t}-\eta_{t}<br>
+$$<br>
+如何将他转到之前定义下降的梯度$\eta_t=\alpha·\dfrac{m_t}{\sqrt{V_t}}$，我们做一下转换：<br>
+为了防止大家看不懂在写一个$t=1$时刻$\eta_0$的状态<br>
+$$<br>
+\eta_1=\alpha g_1<br>
+$$<br>
+$$<br>
+\begin{array}{l}<br>
+\eta_{t}=\gamma \eta_{t-1}+\alpha g_{t} \<br>
+=\gamma^2 \eta_{t-2}+\gamma \alpha g_{t-1}+\alpha g_{t} \<br>
+=\gamma^3 \eta_{t-3}+\gamma^{2} \alpha g_{t-2}+\gamma \alpha g_{t-1}+\alpha g_{t} \<br>
+=\cdots \<br>
+=\gamma^{t-1} \alpha g_{1}+\gamma^{t-2} \alpha g_{2}+\cdots+\gamma^{0}\alpha g_{t}<br>
+\end{array}<br>
+$$<br>
+大家通常也跑过优化器的代码应该知道$\gamma$通常取小于1的值所以$\gamma$离当前时刻越远占的权重就越小，这个叫做指数加权移动平均。虽然，动量法的一阶动量不是取过去所有时间步梯度的平均，但同样能用来控制模型更新的方向，动量法以来指数加权平均使得自变量的更新方向更加一致。而动量法的二阶梯度取为1，所以常说动量法只利用了一阶梯度的信息。</p>
+<h3 id="2-4-SGD">2.4 SGD</h3>
+<p>SGD中他的一阶动量和二阶动量定义如下<br>
+$$<br>
+m_{t}=g_{t};V_{t}=I^2<br>
+$$<br>
+因此他的当前时刻下降的梯度为<br>
+$$<br>
+\eta_t=\alpha·g_{t}<br>
+$$<br>
+SGD最大的缺点是下降速度慢，而且可能会在凹凸的两边持续震荡，停留在一个局部最优点。</p>
+<h3 id="2-5-SGD-with-Momentum">2.5 SGD with Momentum</h3>
+<p>为了抑制SGD的震荡，SGDM认为梯度下降过程可以加入惯性。下坡的时候，如果发现是陡坡，那就利用惯性跑的快一些。SGDM全称是SGD with momentum，在SGD基础上引入了一阶动量：<br>
+$$<br>
+m_t=\beta_1<em>m_{t-1}+(1-\beta)·g_t<br>
+$$<br>
+我们将这个式子换一个形式先将他展开：<br>
+<font color="red"><br>
+$$<br>
+m_t=\beta_1</em>m_{t-1}+g_t-\beta_1·g_t<br>
+$$<br>
+</font><br>
+之后我们合并一下同类项：</p>
+<p>$$<br>
+m_t=g_t+\beta_1*(m_{t-1}-g_t)<br>
+$$<br>
+这个式子有没有类似与卡尔曼滤波中的后验估计的求解。<br>
+卡尔曼是用测量值-先验值，这里是用先验值-测量值。<br>
+相当于他这个求的是$\dfrac{1}{1-\beta_1}$个时刻的平均值，但是此时这个$\beta_1$是个超参数是个定值一般取$0.9$</p>
+<p>这个解决了SGD中收敛缓慢的问题但是还有一个局部最优的问题没有解决。</p>
+<h3 id="2-6-SGD-with-Nesterov-Acceleration">2.6 SGD with Nesterov Acceleration</h3>
+<p>先给出他的改进点主要在第一步：<br>
+$$<br>
+g_{t}=\nabla f\left(w_{t}-\alpha \cdot m_{t-1} / \sqrt{V_{t-1}}\right)<br>
+$$<br>
+根据上面的表达式我们可以知道$\alpha \cdot m_{t-1} / \sqrt{V_{t-1}}$代表的是当前时刻的梯度因此先下降一步，相当于走出去看看，不行就回去。</p>
+<h3 id="2-7-AdaGrad">2.7 AdaGrad</h3>
+<p>这里给出二阶动量的表达式:<br>
+$$<br>
+V_t= {\textstyle \sum_{t}^{T=1}} g_T^2<br>
+$$<br>
+表示所有梯度值的平方，因此我们此时的学习率变成了$\alpha/\sqrt{V_t}$,当梯度整体下降的慢也就是速度较小的时候，相当于学习率会大一点加快下降的速度。<br>
+在这之前我提到过高阶矩的目的，这里大家可以去详细了解一下高阶矩，他有个好记的特性就是对极大值特别的敏感，随着梯度越大下降的速度应该更快。<br>
+这里因为$\sqrt{V_t}$是个单调递增的函数，所以学习率可能下降的很快导致有一些特征没有学到这就是他的缺点。</p>
+<h3 id="2-8AdaDelta-RMSProp">2.8AdaDelta / RMSProp</h3>
+<p>这个方法和SGD with Momentum有点相似不过他这里是为了防止学习率太低的情况，<br>
+$$<br>
+V_t=\beta_2*V_{t-1}+(1-\beta_2)·g_t^2<br>
+$$</p>
+<h3 id="2-9Adam">2.9Adam</h3>
+<p>阿蛋优化器集合了一阶动量以及二阶动量的特点：<br>
+$$<br>
+m_t=\beta_1*m_{t-1}+(1-\beta)·g_t<br>
+$$</p>
+<p>$$<br>
+V_t=\beta_2*V_{t-1}+(1-\beta_2)·g_t^2<br>
+$$</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BC%98%E5%8C%96%E5%99%A8/" rel="tag"># 优化器</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/%E7%A9%B7%E8%8B%A6%E4%BA%BA%E6%B0%91%E5%A6%82%E4%BD%95%E7%94%A8%E7%A7%BB%E5%8A%A8%E5%9B%BA%E6%80%81%E9%85%8D%E7%BD%AEunbutu22.04_awesome-terminal-fonts-CS/" rel="prev" title="穷苦人民如何用移动固态配置unbutu22.04">
+      <i class="fa fa-chevron-left"></i> 穷苦人民如何用移动固态配置unbutu22.04
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/" rel="next" title="交叉熵损失">
+      交叉熵损失 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+    
+  
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">优化器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%A2%AF%E5%BA%A6"><span class="nav-number">1.1.</span> <span class="nav-text">1.神经网络的梯度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1%E6%A2%AF%E5%BA%A6"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1梯度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.2梯度法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%8A%A8%E9%87%8F"><span class="nav-number">1.2.</span> <span class="nav-text">2神经网络动量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1%E4%B8%80%E9%98%B6%E5%8A%A8%E9%87%8F%E5%92%8C%E4%BA%8C%E9%98%B6%E5%8A%A8%E9%87%8F"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1一阶动量和二阶动量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E4%B8%80%E9%98%B6%E7%9F%A9%E5%92%8C%E4%BA%8C%E9%98%B6%E7%9F%A9"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 一阶矩和二阶矩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E5%8A%A8%E9%87%8F%E6%B3%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 动量法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-SGD"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 SGD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-SGD-with-Momentum"><span class="nav-number">1.2.5.</span> <span class="nav-text">2.5 SGD with Momentum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-SGD-with-Nesterov-Acceleration"><span class="nav-number">1.2.6.</span> <span class="nav-text">2.6 SGD with Nesterov Acceleration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-AdaGrad"><span class="nav-number">1.2.7.</span> <span class="nav-text">2.7 AdaGrad</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-8AdaDelta-RMSProp"><span class="nav-number">1.2.8.</span> <span class="nav-text">2.8AdaDelta &#x2F; RMSProp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-9Adam"><span class="nav-number">1.2.9.</span> <span class="nav-text">2.9Adam</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YueSang"
+      src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+  <p class="site-author-name" itemprop="name">YueSang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/YueSangShuai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;YueSangShuai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/0102hanyue@gmail.com" title="E-Mail → 0102hanyue@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="">
+    <a target="_blank" class="social-link" href="/atom.xml" style="color: burlywood;">
+      <span class="icon">
+        <i class="fa fa-rss"></i>
+      </span>
+      <span class="label">RSS</span>
+    </a>
+  </div>
+
+
+    <div class="links-of-blogroll motion-element links-of-blogroll-block">
+        <div class="links-of-blogroll-title recent-posts-title">
+	    <i class="fa fa-history " aria-hidden="true"></i>
+            近期文章
+	</div>
+	<ul class="links-of-blogroll-list recent-posts-list">
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/" title="高斯函数的方差" target="">
+		    高斯函数的方差
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4/" title="向量空间" target="">
+		    向量空间
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E5%B9%B3%E6%96%B9%E7%9A%84%E6%9C%9F%E6%9C%9B/" title="高斯函数平方的期望" target="">
+		    高斯函数平方的期望
+		    </a>
+		</li>
+	</ul>
+    </div>
+
+
+
+	<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+	<div class="widget-wrap">
+		<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="300" height="300" id="resCanvas" style="width:100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOU/" rel="tag">IOU</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jeston-nx/" rel="tag">Jeston nx</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Openvino/" rel="tag">Openvino</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Yolo/" rel="tag">Yolo</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cuda/" rel="tag">cuda</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cudnn/" rel="tag">cudnn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv/" rel="tag">opencv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv-contrib/" rel="tag">opencv_contrib</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorrt/" rel="tag">tensorrt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/" rel="tag">交叉熵损失</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%98%E5%8C%96%E5%99%A8/" rel="tag">优化器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a><span class="tag-list-count">5</span></li></ul>
+			</canvas>
+		</div>
+	</div>
+
+
+      </div>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YueSang</span>
+</div>
+<script defer data-pjax src="/custom/js/footer/fish.js"></script>
+<link rel="stylesheet" href="/custom/css/footer/forter.css">
+<link rel="stylesheet" href="/custom/css/footer/fish_transparent.css">
+
+
+<script defer data-pjax src="/custom/js/footer/runtime.js"></script>
+<div id="runtime_border"></div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '30px',
+  right: 'unset',
+  left: '80px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'Ti1kR0paKsHBzpXZnrhRIx8g-gzGzoHsz',
+      appKey     : 'fmLUyLzUTPYCOpcwoBJqCcSz',
+      placeholder: "来了老弟",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+    </div>
+</body>
+</html>

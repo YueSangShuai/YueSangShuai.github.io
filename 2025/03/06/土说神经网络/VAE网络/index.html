@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="mask-icon" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Serif Simplified Chinese:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-mac-osx.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yuesangshuai.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="分布变化 VAE和GAN的本质都是希望重构一个隐变量$Z$生成目标数据$X$,换一种方式来说就是假设$Z$符合某些分布，然后训练一个模型$X&#x3D;g(Z)$将概率分布映射到X就是从结果映射回训练集(个人理解) VAE主要就是为了解决下面这个问题  VAE理解误区 那现在假设$Z$服从标准的正态分布，那么我就可以从中采样得到若干个$Z1,Z2,…,Zn$，然后对它做变换得到$X^1&#x3D;g(Z1),X^2&#x3D;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VAE网络">
+<meta property="og:url" content="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VAE%E7%BD%91%E7%BB%9C/index.html">
+<meta property="og:site_name" content="你好陌生人">
+<meta property="og:description" content="分布变化 VAE和GAN的本质都是希望重构一个隐变量$Z$生成目标数据$X$,换一种方式来说就是假设$Z$符合某些分布，然后训练一个模型$X&#x3D;g(Z)$将概率分布映射到X就是从结果映射回训练集(个人理解) VAE主要就是为了解决下面这个问题  VAE理解误区 那现在假设$Z$服从标准的正态分布，那么我就可以从中采样得到若干个$Z1,Z2,…,Zn$，然后对它做变换得到$X^1&#x3D;g(Z1),X^2&#x3D;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/894cfeb0551a2031c8049d2987814dac.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/1dd5b522109ac7188a62d8c8594a7737.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/40b1004fdb091f7f35ab4ac9873e3752.png">
+<meta property="article:published_time" content="2025-03-06T07:01:47.372Z">
+<meta property="article:modified_time" content="2025-03-06T07:01:47.373Z">
+<meta property="article:author" content="YueSang">
+<meta property="article:tag" content="IOU">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/894cfeb0551a2031c8049d2987814dac.png">
+
+<link rel="canonical" href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VAE%E7%BD%91%E7%BB%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+
+<script type="text/javascript" src="/custom/js/head/love.js"></script>
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+<script type="text/javascript" src="/custom/js/head/fire.js"></script>
+
+
+<script type = "text/javascript" src="/custom/js/head/snow.js"></script>
+
+
+<script src="/live2d-widget/autoload.js"></script>
+
+
+<div id="catcat"></div>
+<link rel="stylesheet" href="/custom/css/head/cat.css">
+<script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script defer data-pjax src="/custom/js/head/cat.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/cursor.css">
+<script defer data-pjax src="/custom/js/head/cursor.js"></script>
+
+
+<span id="fps"></span> 
+<link rel="stylesheet" href="/custom/css/head/fps.css">
+<script src="/custom/js/head/fps.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/scorllbar.css">
+
+
+<link rel="stylesheet" href="/custom/css/body.css">
+
+
+<script defer data-pjax src="/custom/js/head/cursormove.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/funny_title.js"></script>
+
+
+<div id="scroll-buttons">
+  <button id="scroll-to-top">↑</button>
+  <button id="scroll-to-bottom">↓</button>
+</div>
+<script defer data-pjax src="/custom/js/head/topdown.js"></script>
+<link rel="stylesheet" href="/custom/css/head/topdown.css">
+
+
+<script defer data-pjax src="/custom/js/head/sun_moon.js"></script>
+<link rel="stylesheet" href="/custom/css/head/sun_moon.css">
+
+
+<script defer data-pjax src="/custom/js/head/tag-styles.js"></script>
+<link rel="stylesheet" href="/custom/css/head/tag-styles.css">
+
+
+<link rel="stylesheet" href="/custom/css/head/recent_post.css">
+
+<script defer data-pjax src="/custom/js/head/random_img_recent_post.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/category.css">
+
+
+
+<script defer data-pjax src="/custom/js/head/raydar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/bar.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/loading/default.css">
+<script defer data-pjax src="/custom/js/head/loading.js"></script>
+
+
+
+
+<script defer data-pjax src="/custom/js/head/code-unfloder.js"></script>
+<link rel="stylesheet" href="/custom/css/head/highlight.css">
+
+
+<script defer data-pjax src="/custom/js/head/SAO_Menu.js"></script>
+
+
+<script defer data-pjax src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/js/swiper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/css/swiper.min.css">
+<script defer data-pjax src="/custom/js/head/swiper_init.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <title>VAE网络 | 你好陌生人</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+<link rel="alternate" href="/atom.xml" title="你好陌生人" type="application/atom+xml">
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+
+  
+  
+  
+    <div id="loading-box">
+  <div class="SAO-scene">
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+  </div>
+</div>
+
+    <div class="pretype" id="default"></div>
+  
+
+
+<div id="SAO-back">
+  <div id="SAO-menu">
+    <div id="SAO-menu-content">
+            
+            <div class="utils-list">
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Tell</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">Anything can I help you ?</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-question-circle" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/guestbook/')},500);"></i>
+                    
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Menu</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">The menu of my blog</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-tasks" onclick="panelAudio();UtilsClick()"></i>
+                    
+                    
+                        
+                            
+                        
+                        <div class="menu-list" style="top:-143px;">
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-home" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/')},500);">Home</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="panelAudio();MenusClick()">Document</i>
+                            
+                            
+                                
+                                    
+                                
+
+                                <div class="menu-child" style="top:-40px;">
+                                
+                                    <div class="menu-list-child">
+                                    
+                                        <i class="fa fa-file-invoice" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/hexo%E9%85%8D%E7%BD%AE/')},500);">Beautify</i>
+                                    
+                                    </div>
+                                
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-archive" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/archives/')},500);">Archives</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/')},500);">Categoties</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-tags" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/tags/')},500);">Tags</i>
+                            
+                            
+                            </div>
+                        
+                        </div>
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">log out</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">log out</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-power-off" onclick="clickAudio();setTimeout(function(){SAOclose();SAOKeepOff()},500);"></i>
+                    
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">你好陌生人</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-book fa-fw"></i>guestbook</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yuesangshuai.github.io/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VAE%E7%BD%91%E7%BB%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+      <meta itemprop="name" content="YueSang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="你好陌生人">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VAE网络
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-06 15:01:47" itemprop="dateCreated datePublished" datetime="2025-03-06T15:01:47+08:00">2025-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">神经网络</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VAE%E7%BD%91%E7%BB%9C/" class="post-meta-item leancloud_visitors" data-flag-title="VAE网络" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VAE%E7%BD%91%E7%BB%9C/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VAE%E7%BD%91%E7%BB%9C/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+<section class="main-hero-waves-area waves-area">
+  <svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path>
+    </defs>
+    <g class="parallax">
+      <use href="#gentle-wave" x="48" y="0"></use>
+      <use href="#gentle-wave" x="48" y="3"></use>
+      <use href="#gentle-wave" x="48" y="5"></use>
+      <use href="#gentle-wave" x="48" y="7"></use>
+    </g>
+  </svg>
+</section>
+<link rel="stylesheet" href="/custom/css/post-meta/wave.css">
+
+
+<link rel="stylesheet" href="/custom/css/post-meta/fengche.css">
+
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>分布变化</h1>
+<p>VAE和GAN的本质都是希望重构一个隐变量$Z$生成目标数据$X$,换一种方式来说就是假设$Z$符合某些分布，然后训练一个模型$X=g(Z)$将概率分布映射到X就是从结果映射回训练集(个人理解)<br>
+VAE主要就是为了解决下面这个问题</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/894cfeb0551a2031c8049d2987814dac.png" alt="894cfeb0551a2031c8049d2987814dac.png"></p>
+<h1>VAE理解误区</h1>
+<p>那现在假设$Z$服从标准的正态分布，那么我就可以从中采样得到若干个$Z1,Z2,…,Zn$，然后对它做变换得到$X^1=g(Z1),X^2=g(Z2),…,X^n=g(Zn)$，我们怎么判断这个通过$g$构造出来的数据集，它的分布跟我们目标的数据集分布是不是一样的呢？有读者说不是有KL散度吗？当然不行，因为KL散度是根据两个概率分布的表达式来算它们的相似度的，然而目前我们并不知道它们的概率分布的表达式，我们只有样本本身而没有分布表达式就没办法计算KL散度。</p>
+<p>首先我们有一批数据样本${X1,…,Xn}$其整体用$X$描述，我们本想根据${X1,…,Xn}$到$X$布$p(X)$如果能得到的话，那我直接根据$p(X)$采样，就可以得到所有可能的$X$（包括${X1,…,Xn}$外的），这是一个终极理想的生成模型了。当然，这个理想很难实现，于是我们将分布改一改<br>
+$$<br>
+p(X)=\sum_Z p(X \mid Z) p(Z)<br>
+$$</p>
+<p>$p(X|Z)$就描述了一个由$Z$来生成$X$的模型，而我们假设$Z$服从标准正态分布，$p(Z)=N(0,I)$。如果这个理想能实现，那么我们就可以先从标准正态分布中采样一个$Z$，然后根据$Z$来算一个$X$，也是一个很棒的生成模型。接下来就是结合自编码器来实现重构，保证有效信息没有丢失，再加上一系列的推导，最后把模型实现。框架的示意图如下：<br>
+<img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/1dd5b522109ac7188a62d8c8594a7737.png" alt="1dd5b522109ac7188a62d8c8594a7737.png"><br>
+如果按照上述流程的话会出现一个问题，无法保证重新采样出来的$Z_k$是否还对应着远来的$X_k$,。</p>
+<h1>一致性</h1>
+<p>在VAE中没有假设$p(Z)$是符合正太分布的，假设的是$p(Z|X)$是符合正太分布的。</p>
+<p>给定一个真实样本$X_k$，我们假设存在一个专属于$X_k$的分布$p(Z|Xk)$，并进一步假设这个分布是（独立的、多元的）正态分布。为什么要强调“专属”呢？因为我们后面要训练一个生成器$X=g(Z)$，希望能够把从分布$P(Z|X_k)$采样出来的一个$Z_k$还原为$X_k$。如果假设$p(Z)$是正态分布，然后从$p(Z)$中采样一个$Z$，那么我们怎么知道这个$Z$对应于哪个真实的$X$呢？现在$p(Z|X_k)$专属于$X_k$，我们有理由说从这个分布采样出来的$Z$应该要还原到$X_k$中去。</p>
+<p>此时每一个$X_k$都有一个专属的正太分布方便后面的生成器进行还原，正太分布有两个参数均值 $\mu$ 和方差 $\sigma^2$，此时我们采用神经网络来拟合他们正太分布的均值和方差，具体流程如下:<br>
+<img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/40b1004fdb091f7f35ab4ac9873e3752.png" alt="40b1004fdb091f7f35ab4ac9873e3752.png"></p>
+<h1>随机性</h1>
+<p>首先，我们希望重构$X$，也就是最小化$D(X^k,X_k)^2$，但是这个重构过程受到噪声的影响，因为$Z_k$是通过重新采样过的，不是直接由encoder算出来的。显然噪声会增加重构的难度，不过好在这个噪声强度（也就是方差）通过一个神经网络算出来的，所以最终模型为了重构得更好，肯定会想尽办法让方差为0。而方差为0的话，也就没有随机性了，所以不管怎么采样其实都只是得到确定的结果（也就是均值），只拟合一个当然比拟合多个要容易，而均值是通过另外一个神经网络算出来的。<br>
+说白了，模型会慢慢退化成普通的AutoEncoder，噪声不再起作用。<br>
+这样不就白费力气了吗？说好的生成模型呢？</p>
+<p>别急别急，其实VAE还让所有的$p(Z|X)$都向标准正态分布看齐，这样就防止了噪声为零，同时保证了模型具有生成能力。怎么理解“保证了生成能力”呢？如果所有的$p(Z|X)$都很接近标准正态分布$N(0,I)$，那么根据定义<br>
+$$<br>
+p(Z)=\sum_X p(Z \mid X) p(X)=\sum_X \mathcal{N}(0, I) p(X)=\mathcal{N}(0, I) \sum_X p(X)=\mathcal{N}(0, I)<br>
+$$<br>
+这样我们就能达到我们的先验假设：$p(Z)$是标准正态分布。然后我们就可以放心地从$N(0,I)$中采样来生成图像了.</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/IOU/" rel="tag"># IOU</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/06/hexo%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/hexo%E5%9F%BA%E7%A1%80%E7%89%88%E6%90%AD%E5%BB%BA/" rel="prev" title="hexo基础版搭建">
+      <i class="fa fa-chevron-left"></i> hexo基础版搭建
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/%E5%9C%9F%E8%AF%B4%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/IOU%E5%92%8C%E4%BB%96%E4%BB%AC%E5%84%BF%E5%AD%90%E4%BB%AC/" rel="next" title="IOU和他们儿子们">
+      IOU和他们儿子们 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+    
+  
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">分布变化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">VAE理解误区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">一致性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">随机性</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YueSang"
+      src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+  <p class="site-author-name" itemprop="name">YueSang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/YueSangShuai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;YueSangShuai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/0102hanyue@gmail.com" title="E-Mail → 0102hanyue@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="">
+    <a target="_blank" class="social-link" href="/atom.xml" style="color: burlywood;">
+      <span class="icon">
+        <i class="fa fa-rss"></i>
+      </span>
+      <span class="label">RSS</span>
+    </a>
+  </div>
+
+
+    <div class="links-of-blogroll motion-element links-of-blogroll-block">
+        <div class="links-of-blogroll-title recent-posts-title">
+	    <i class="fa fa-history " aria-hidden="true"></i>
+            近期文章
+	</div>
+	<ul class="links-of-blogroll-list recent-posts-list">
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/" title="高斯函数的方差" target="">
+		    高斯函数的方差
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4/" title="向量空间" target="">
+		    向量空间
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E5%B9%B3%E6%96%B9%E7%9A%84%E6%9C%9F%E6%9C%9B/" title="高斯函数平方的期望" target="">
+		    高斯函数平方的期望
+		    </a>
+		</li>
+	</ul>
+    </div>
+
+
+
+	<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+	<div class="widget-wrap">
+		<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="300" height="300" id="resCanvas" style="width:100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOU/" rel="tag">IOU</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jeston-nx/" rel="tag">Jeston nx</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Openvino/" rel="tag">Openvino</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Yolo/" rel="tag">Yolo</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cuda/" rel="tag">cuda</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cudnn/" rel="tag">cudnn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv/" rel="tag">opencv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv-contrib/" rel="tag">opencv_contrib</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorrt/" rel="tag">tensorrt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/" rel="tag">交叉熵损失</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%98%E5%8C%96%E5%99%A8/" rel="tag">优化器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a><span class="tag-list-count">5</span></li></ul>
+			</canvas>
+		</div>
+	</div>
+
+
+      </div>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YueSang</span>
+</div>
+<script defer data-pjax src="/custom/js/footer/fish.js"></script>
+<link rel="stylesheet" href="/custom/css/footer/forter.css">
+<link rel="stylesheet" href="/custom/css/footer/fish_transparent.css">
+
+
+<script defer data-pjax src="/custom/js/footer/runtime.js"></script>
+<div id="runtime_border"></div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '30px',
+  right: 'unset',
+  left: '80px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'Ti1kR0paKsHBzpXZnrhRIx8g-gzGzoHsz',
+      appKey     : 'fmLUyLzUTPYCOpcwoBJqCcSz',
+      placeholder: "来了老弟",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+    </div>
+</body>
+</html>

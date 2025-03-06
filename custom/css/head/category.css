@@ -1,0 +1,71 @@
+:root {
+    --categorys-bgcolor: rgba(255,255,255,0.5);
+    --article-content-bgcolor: #49b1f5;
+    --categorys-arrow: #fff;
+    --categorys-cover-shadow: #fff;
+    --categorys-transition: all 0.5s cubic-bezier(0.59, 0.01, 0.48, 1.17);
+  }
+  .darkmode--activated {
+    --categorys-bgcolor: rgba(35,35,35,0.5);
+    --article-content-bgcolor: #99999a;
+    --categorys-arrow: #37e2dd;
+    --categorys-cover-shadow: #232323;
+  }
+  .categorys {
+    padding: 0 15px 0 15px;
+    height: fit-content;
+  }
+  .categorys .categorys-item {
+    margin-bottom: 15px;
+    width: 100%;
+    background: var(--categorys-bgcolor);
+    overflow: hidden;
+    border-radius: 15px;
+  }
+  .categorys .categorys-item .categorys-content {
+    display: flex;
+    background: var(--categorys-bgcolor);
+    position: relative;
+  }
+
+  .categorys .categorys-item .categorys-content .categorys-cover {
+    display: flex;
+    background: transparent;
+  }
+
+  .categorys .categorys-item .categorys-content .categorys-cover:hover {
+    transform: scale(1.2); /* 在悬浮时将图片放大 5% */
+    transition: transform 0.3s ease; /* 添加过渡动画效果 */
+  }
+
+  .categorys .categorys-item .categorys-content .categorys-info {
+    display: flex;
+    background: transparent;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .categorys .categorys-item .categorys-content .categorys-info .article-title {
+    height: 50%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: flex-end;
+    flex-direction: column;
+  }
+
+  .categorys .categorys-item .categorys-content .categorys-info .article-title .article-title-link {
+    color: var(--text-highlight-color);
+    transition: all 0.2s ease-in-out;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .categorys .categorys-item .categorys-content .categorys-info .article-title .article-title-link:hover {
+    color: #5bacace8;
+  }
+  .categorys .categorys-item .categorys-content .categorys-cover img {
+    height: 100px;
+    width: 100%;
+    object-fit: cover;
+  }

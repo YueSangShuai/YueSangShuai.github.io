@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png">
+  <link rel="mask-icon" href="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bachongyingQ2.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Serif Simplified Chinese:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-mac-osx.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yuesangshuai.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="ubuntu22 pycharm,cuda,cudnn，tensorrt的安装 （写这篇博客的意义在于之后方便之后重装不用再重新看一大堆博客了） 我的电脑配置为y9000p(2022),12i7,3060的显卡 pycharm版本为2022.2,cuda版本为11.6.2 cudnn版本为8.4.1,tensorrt版本为8.4.1 一.pycharm的安装 官方的安装连接:Download Py">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu22 pycharm,cuda,cudnn，tensorrt的安装">
+<meta property="og:url" content="http://yuesangshuai.github.io/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%20pycharm,cuda,cudnn%EF%BC%8Ctensorrt%E7%9A%84%E5%AE%89%E8%A3%85_ubuntu22%20l/index.html">
+<meta property="og:site_name" content="你好陌生人">
+<meta property="og:description" content="ubuntu22 pycharm,cuda,cudnn，tensorrt的安装 （写这篇博客的意义在于之后方便之后重装不用再重新看一大堆博客了） 我的电脑配置为y9000p(2022),12i7,3060的显卡 pycharm版本为2022.2,cuda版本为11.6.2 cudnn版本为8.4.1,tensorrt版本为8.4.1 一.pycharm的安装 官方的安装连接:Download Py">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6c0b69b61bf14dd6a0b2c3a5d2caefd0_79a070ed217a4622b.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/deedfe2db2f7493d850087f8eb3af135_3bac9215b4b745b7b.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/17c7cfc464b54a90b6fb8e4257c7ca2a_259f95930526495c8.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/4107bb0291614f308aa2cfa11b25eb48_bc486b7a284541d48.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/14d411a70a8a496db4597f6b75c2bf16_906040e8175e420aa.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/472f848107ea4535bd4249ef515ebcb4_5c8286c7ed0b46989.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/7b9eaf1e05594a15ab45ae4ccfd5b97b_12b269e7bf4445879.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c33c5596287f4f7e99b292b501636093_b631af5dcf9e426b9.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/be2fd1ea55654298a1e054707fa019c2_1390615b7701418d8.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/cdc3b1056f874696b16b61351371eb6e_842dcbddc6794f779.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/7dc6f3364ff94039ace3ef3ffc66113b_92618f1fc8ac48ed9.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5c812c23a6ee4fd69748eb91a128dc05_39a5e78576a14f1ca.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5ea6dfd19d964fa9ac7b7f95183dbf1d_1475ea4225a84c158.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/a6886047066744b08e2fa1cfc9af2df0_63d7e9f5fdd8445bb.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/b54f4a317fc64aa795e66bf71163d97e_d0876e270e6e47f28.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/4373d4bbf57445989e5004d3bd6ad751_cd458d6cee7a44d79.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/9f24be3dde60443f9a18839b76218bdb_6e701b31e177461eb.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/0e435b363bc446c886e43e5b21292e23_54c963cc1b2a438ab.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/3eb8c7cdcede4fdead0f60fb785bad68_4fb7033780c548148.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5fdfb1069d5c433781f5f8abf04410eb_48a6f8c2ba974c2db.png">
+<meta property="article:published_time" content="2025-03-06T07:01:47.371Z">
+<meta property="article:modified_time" content="2025-03-06T07:01:47.371Z">
+<meta property="article:author" content="YueSang">
+<meta property="article:tag" content="cuda">
+<meta property="article:tag" content="cudnn">
+<meta property="article:tag" content="tensorrt">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6c0b69b61bf14dd6a0b2c3a5d2caefd0_79a070ed217a4622b.png">
+
+<link rel="canonical" href="http://yuesangshuai.github.io/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%20pycharm,cuda,cudnn%EF%BC%8Ctensorrt%E7%9A%84%E5%AE%89%E8%A3%85_ubuntu22%20l/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+
+<script type="text/javascript" src="/custom/js/head/love.js"></script>
+
+<canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+<script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+<script type="text/javascript" src="/custom/js/head/fire.js"></script>
+
+
+<script type = "text/javascript" src="/custom/js/head/snow.js"></script>
+
+
+<script src="/live2d-widget/autoload.js"></script>
+
+
+<div id="catcat"></div>
+<link rel="stylesheet" href="/custom/css/head/cat.css">
+<script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script defer data-pjax src="/custom/js/head/cat.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/cursor.css">
+<script defer data-pjax src="/custom/js/head/cursor.js"></script>
+
+
+<span id="fps"></span> 
+<link rel="stylesheet" href="/custom/css/head/fps.css">
+<script src="/custom/js/head/fps.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/scorllbar.css">
+
+
+<link rel="stylesheet" href="/custom/css/body.css">
+
+
+<script defer data-pjax src="/custom/js/head/cursormove.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/funny_title.js"></script>
+
+
+<div id="scroll-buttons">
+  <button id="scroll-to-top">↑</button>
+  <button id="scroll-to-bottom">↓</button>
+</div>
+<script defer data-pjax src="/custom/js/head/topdown.js"></script>
+<link rel="stylesheet" href="/custom/css/head/topdown.css">
+
+
+<script defer data-pjax src="/custom/js/head/sun_moon.js"></script>
+<link rel="stylesheet" href="/custom/css/head/sun_moon.css">
+
+
+<script defer data-pjax src="/custom/js/head/tag-styles.js"></script>
+<link rel="stylesheet" href="/custom/css/head/tag-styles.css">
+
+
+<link rel="stylesheet" href="/custom/css/head/recent_post.css">
+
+<script defer data-pjax src="/custom/js/head/random_img_recent_post.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/head/category.css">
+
+
+
+<script defer data-pjax src="/custom/js/head/raydar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script defer data-pjax src="/custom/js/head/bar.js"></script>
+
+
+<link rel="stylesheet" href="/custom/css/loading/default.css">
+<script defer data-pjax src="/custom/js/head/loading.js"></script>
+
+
+
+
+<script defer data-pjax src="/custom/js/head/code-unfloder.js"></script>
+<link rel="stylesheet" href="/custom/css/head/highlight.css">
+
+
+<script defer data-pjax src="/custom/js/head/SAO_Menu.js"></script>
+
+
+<script defer data-pjax src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/js/swiper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.1.6/css/swiper.min.css">
+<script defer data-pjax src="/custom/js/head/swiper_init.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <title>ubuntu22 pycharm,cuda,cudnn，tensorrt的安装 | 你好陌生人</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+
+<link rel="alternate" href="/atom.xml" title="你好陌生人" type="application/atom+xml">
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+
+  
+  
+  
+    <div id="loading-box">
+  <div class="SAO-scene">
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+    <div class="SAO-wrap">
+      <div class="SAO-wall SAO-wall-right"></div>
+      <div class="SAO-wall SAO-wall-left"></div>
+      <div class="SAO-wall SAO-wall-top"></div>
+      <div class="SAO-wall SAO-wall-bottom"></div>
+      <div class="SAO-wall SAO-wall-back"></div>
+    </div>
+  </div>
+</div>
+
+    <div class="pretype" id="default"></div>
+  
+
+
+<div id="SAO-back">
+  <div id="SAO-menu">
+    <div id="SAO-menu-content">
+            
+            <div class="utils-list">
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Tell</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">Anything can I help you ?</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-question-circle" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/guestbook/')},500);"></i>
+                    
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">Menu</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">The menu of my blog</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-tasks" onclick="panelAudio();UtilsClick()"></i>
+                    
+                    
+                        
+                            
+                        
+                        <div class="menu-list" style="top:-143px;">
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-home" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/')},500);">Home</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="panelAudio();MenusClick()">Document</i>
+                            
+                            
+                                
+                                    
+                                
+
+                                <div class="menu-child" style="top:-40px;">
+                                
+                                    <div class="menu-list-child">
+                                    
+                                        <i class="fa fa-file-invoice" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/hexo%E9%85%8D%E7%BD%AE/')},500);">Beautify</i>
+                                    
+                                    </div>
+                                
+                                </div>
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-archive" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/archives/')},500);">Archives</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-folder-open" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/categories/')},500);">Categoties</i>
+                            
+                            
+                            </div>
+                        
+                            <div class="menu-list-item">
+                            
+                                <i class="fa fa-tags" onclick="clickAudio();setTimeout(function(){SAOclose();linkStart('http://localhost:4000/tags/')},500);">Tags</i>
+                            
+                            
+                            </div>
+                        
+                        </div>
+                    
+                </div>
+                
+                <div class="utils-list-item">
+                    
+                    <div class="user-panel" style="top:;">
+                        <div class="user-panel-name">log out</div>
+                        <div class="user-panel-img">
+                        
+                            
+                        <img src="/assets/info.png" />
+                        </div>
+                        <div class="user-panel-properties">log out</div>
+                    </div>
+                    
+                    
+                        <i class="fa fa-power-off" onclick="clickAudio();setTimeout(function(){SAOclose();SAOKeepOff()},500);"></i>
+                    
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">你好陌生人</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-guestbook">
+
+    <a href="/guestbook/" rel="section"><i class="fa fa-book fa-fw"></i>guestbook</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yuesangshuai.github.io/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%20pycharm,cuda,cudnn%EF%BC%8Ctensorrt%E7%9A%84%E5%AE%89%E8%A3%85_ubuntu22%20l/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+      <meta itemprop="name" content="YueSang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="你好陌生人">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ubuntu22 pycharm,cuda,cudnn，tensorrt的安装
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-06 15:01:47" itemprop="dateCreated datePublished" datetime="2025-03-06T15:01:47+08:00">2025-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">环境配置</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%20pycharm,cuda,cudnn%EF%BC%8Ctensorrt%E7%9A%84%E5%AE%89%E8%A3%85_ubuntu22%20l/" class="post-meta-item leancloud_visitors" data-flag-title="ubuntu22 pycharm,cuda,cudnn，tensorrt的安装" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%20pycharm,cuda,cudnn%EF%BC%8Ctensorrt%E7%9A%84%E5%AE%89%E8%A3%85_ubuntu22%20l/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%20pycharm,cuda,cudnn%EF%BC%8Ctensorrt%E7%9A%84%E5%AE%89%E8%A3%85_ubuntu22%20l/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+<section class="main-hero-waves-area waves-area">
+  <svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path>
+    </defs>
+    <g class="parallax">
+      <use href="#gentle-wave" x="48" y="0"></use>
+      <use href="#gentle-wave" x="48" y="3"></use>
+      <use href="#gentle-wave" x="48" y="5"></use>
+      <use href="#gentle-wave" x="48" y="7"></use>
+    </g>
+  </svg>
+</section>
+<link rel="stylesheet" href="/custom/css/post-meta/wave.css">
+
+
+<link rel="stylesheet" href="/custom/css/post-meta/fengche.css">
+
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>ubuntu22 pycharm,cuda,cudnn，tensorrt的安装</h1>
+<p>（写这篇博客的意义在于之后方便之后重装不用再重新看一大堆博客了）</p>
+<p><strong>我的电脑配置为y9000p(2022),12i7,3060的显卡 pycharm版本为2022.2,cuda版本为11.6.2</strong></p>
+<p><strong>cudnn版本为8.4.1,tensorrt版本为8.4.1</strong></p>
+<h2 id="一-pycharm的安装"><a href="#"></a>一.pycharm的安装</h2>
+<p>官方的安装连接:<a target="_blank" rel="noopener" href="https://www.jetbrains.com/pycharm/download/#section=linux" title="Download PyCharm: Python IDE for Professional Developers by JetBrains">Download PyCharm: Python IDE for Professional Developers by JetBrains</a></p>
+<p>下载下来后先不着急可以先把pycharm固定到收藏夹上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd ~/.local/share/applications/</span><br><span class="line">sudo gedit Pycharm.desktop</span><br></pre></td></tr></table></figure>
+<p><strong>之后将下方文字复制进去（注意注释!）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Desktop Entry]</span><br><span class="line">Version=1.0</span><br><span class="line">Terminal=false</span><br><span class="line">Type=Application</span><br><span class="line">Name=Pycharm</span><br><span class="line">Exec=/opt/pycharm/bin/pycharm.sh</span><br><span class="line"># 注意：Exec表示安装软件的**启动快捷方式**文件路径</span><br><span class="line"># 注意：Icon表示安装软件的图标路径</span><br><span class="line">Icon=/opt/pycharm/bin/pycharm.png</span><br><span class="line">NoDisplay=false</span><br><span class="line">StartupWMClass=</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>之后就可以把pycharm固定到收藏夹上</p>
+<h2 id="二-minconda的安装"><a href="#"></a>二.minconda的安装</h2>
+<p>miniconda安装的时候如果采用sudo则以后使用conda命令需要加sudo</p>
+<p>这里选择的是miniconda因为我服务器上面之前配置的也是miniconda为了向服务器看齐，这里的话如果安装的是anconda的话window环境下anconda的env拷贝进来好像是可以直接用的，这个我还没有尝试过。</p>
+<p><strong>miniconda的地址：</strong><a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/" title="Index of /anaconda/miniconda/ | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror">Index of /anaconda/miniconda/ | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror</a></p>
+<p><strong>anconda的地址：</strong><a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/" title="Index of /anaconda/archive/ | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror">Index of /anaconda/archive/ | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror</a></p>
+<p>minconda和anconda的差别就是anconda的base环境包括了conda管理器、Pyhon编译器、常用的包和Spyder IDE等，而miniconda的base环境选择只包括conda管理器和Python编译器</p>
+<p>然后选择你下载下来的sh进行安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo bash Miniconda3-py39_4.9.2-Linux-x86_64.sh</span><br></pre></td></tr></table></figure>
+<h2 id="三-Nvdia显卡的安装"><a href="#"></a>三.Nvdia显卡的安装</h2>
+<p>首先是关于显卡的卸载，我们可以进入附加驱动中选择x.org选项就相当于把本来的显卡驱动删除了，如果你有两个显示屏的话安装完显卡驱动后副屏才可以用因为副屏是挂载在你的独显上</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/6c0b69b61bf14dd6a0b2c3a5d2caefd0_79a070ed217a4622b.png" alt=""></p>
+<p> 显卡安装不建议用附加驱动，因为很慢，所以可以换源后直接用命令行安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ubuntu-drivers devices</span><br></pre></td></tr></table></figure>
+<p>这是可用的显卡</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/deedfe2db2f7493d850087f8eb3af135_3bac9215b4b745b7b.png" alt=""></p>
+<p> <strong>在安装NVIDIA驱动以前需要禁止系统自带显卡驱动nouveau：可以先通过指令<code>lsmod | grep nouveau</code>查看nouveau驱动的启用情况，如果有输出表示nouveau驱动正在工作，如果没有内容输出则表示已经禁用了nouveau</strong>**(这里我没有图所以找了一张网上的)**</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/17c7cfc464b54a90b6fb8e4257c7ca2a_259f95930526495c8.png" alt=""></p>
+<p> 电脑有有输出，表示nouveau启动了，下面进行nouveau的禁用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gedit /etc/modprobe.d/blacklist.conf</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/4107bb0291614f308aa2cfa11b25eb48_bc486b7a284541d48.png" alt=""></p>
+<p>在blacklist.conf文件末尾加上这两行，并保存：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">blacklist nouveau</span><br><span class="line">options nouveau modeset=0</span><br></pre></td></tr></table></figure>
+<p>然后在终端中输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo update-initramfs -u  #应用更改</span><br></pre></td></tr></table></figure>
+<p><strong>选择合适的显卡进行下载（可以进入官网查看cuda和显卡的对应版本:<a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html" title="Release Notes :: CUDA Toolkit Documentation">Release Notes :: CUDA Toolkit Documentation</a>）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install nvidia-driver-510 # 根据自己的n卡可选驱动下载显卡驱动</span><br></pre></td></tr></table></figure>
+<p>重启电脑后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvidia-smi </span><br></pre></td></tr></table></figure>
+<p>查看是否安装完成</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/14d411a70a8a496db4597f6b75c2bf16_906040e8175e420aa.png" alt=""></p>
+<p><strong>（这里有一点需要特别注意：右上角的CUDA Version的意思是你的装的显卡驱动最大支持11.6的cuda）</strong></p>
+<h2 id="四：CUDA的安装"><a href="#"></a><strong>四：CUDA的安装</strong></h2>
+<h3 id="CUDA下载"><a href="#"></a><strong>CUDA下载</strong></h3>
+<p>我们进入<a target="_blank" rel="noopener" href="https://developer.nvidia.cn/cuda-toolkit-archive" title="CUDA Toolkit Archive | NVIDIA Developer">CUDA Toolkit Archive | NVIDIA Developer</a>选择我们适合的cuda这里我选择11.6.2版本的</p>
+<img width="1200" height="654" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/472f848107ea4535bd4249ef515ebcb4_5c8286c7ed0b46989.png" class="jop-noMdConv">
+<p> 安装的命令如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda_11.6.2_510.47.03_linux.run</span><br><span class="line">sudo sh cuda_11.6.2_510.47.03_linux.run</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>细节的地方来了，你的tmp空间可能不够你可以在你的home文件夹下建立一个tmp然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda_11.6.2_510.47.03_linux.run</span><br><span class="line">sudo sh cuda_11.6.2_510.47.03_linux.run --tmpdir=这里填写你的新建立的tmp位置</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>使用完以后删掉这个tmp即可因为tmp文件夹重启后里面的文件默认不保存</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/7b9eaf1e05594a15ab45ae4ccfd5b97b_12b269e7bf4445879.png" alt=""></p>
+<p>等待一会这个时间可能会有点长</p>
+<p>选择continue</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c33c5596287f4f7e99b292b501636093_b631af5dcf9e426b9.png" alt=""> 输入accept</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/be2fd1ea55654298a1e054707fa019c2_1390615b7701418d8.png" alt=""></p>
+<p> 因为刚开始我们已经安装完驱动所以这里可以不用选择（之前安装的时候出现了一个小问题就是我当初重装显卡驱动的时候把显卡驱动删了想着能不能用run里面自带的但是我是没有成功，之后用下面这个方法也同样成功运行）</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/cdc3b1056f874696b16b61351371eb6e_842dcbddc6794f779.png" alt=""></p>
+<h3 id="配置cuda环境"><a href="#"></a><strong>配置cuda环境</strong></h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gedit ~/.bashrc</span><br></pre></td></tr></table></figure>
+<p>添加以下到末尾</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export PATH=$PATH:/usr/local/cuda/bin  </span><br><span class="line">export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64  </span><br><span class="line">export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/cuda/lib64</span><br></pre></td></tr></table></figure>
+<p>然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+<p>在终端输入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc -V</span><br></pre></td></tr></table></figure>
+<p>显示以下则为成功（记得V要大写）</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/7dc6f3364ff94039ace3ef3ffc66113b_92618f1fc8ac48ed9.png" alt=""></p>
+<p><strong>如果不成功，重新source ~/.bashrc然后输入nvcc -V成功的话，细节的地方来了！！！！！</strong></p>
+<p><strong>首先，我们需要搞明白Linux启动时读取配置文件的顺序。在刚登录Linux时，首先启动<code>/etc/profile</code> 文件，然后再启动用户目录下的 <code>~/.bash_profile</code>、<code>~/.bash_login</code>或 <code>~/.profile</code>文件中的其中一个，<br>
+执行的顺序为：<code>~/.bash_profile</code>、<code>~/.bash_login</code>、 <code>~/.profile</code></strong></p>
+<p><code>所以如果行不同我们可以：</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gedit /etc/profile</span><br></pre></td></tr></table></figure>
+<p>然后输入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export PATH=$PATH:/usr/local/cuda/bin  </span><br><span class="line">export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64  </span><br><span class="line">export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/cuda/lib64</span><br></pre></td></tr></table></figure>
+<p>最后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<p>之后应该就能显示了</p>
+<h3 id="CUDA的测试"><a href="#"></a>CUDA的测试</h3>
+<p>下载测试文件：<a target="_blank" rel="noopener" href="https://github.com/nvidia/cuda-samples" title="GitHub - NVIDIA/cuda-samples: Samples for CUDA Developers which demonstrates features in CUDA Toolkit">GitHub - NVIDIA/cuda-samples: Samples for CUDA Developers which demonstrates features in CUDA Toolkit</a></p>
+<p>下载解压后make一下</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5c812c23a6ee4fd69748eb91a128dc05_39a5e78576a14f1ca.png" alt=""></p>
+<p> <img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5ea6dfd19d964fa9ac7b7f95183dbf1d_1475ea4225a84c158.png" alt=""></p>
+<p> <img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/a6886047066744b08e2fa1cfc9af2df0_63d7e9f5fdd8445bb.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/b54f4a317fc64aa795e66bf71163d97e_d0876e270e6e47f28.png" alt=""></p>
+<p>出现这个结果就是成功了</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/4373d4bbf57445989e5004d3bd6ad751_cd458d6cee7a44d79.png" alt=""></p>
+<h2 id="四-CUDANN的安装"><a href="#"></a>四.CUDANN的安装</h2>
+<h3 id="CUDANN下载"><a href="#"></a>CUDANN下载</h3>
+<p>下载连接：<a target="_blank" rel="noopener" href="https://developer.nvidia.com/rdp/cudnn-download">https://developer.nvidia.com/rdp/cudnn-download</a></p>
+<p>这里我下在的是cudann8.4.1</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/9f24be3dde60443f9a18839b76218bdb_6e701b31e177461eb.png" alt=""></p>
+<p> 下载Linux x86-64(tar)</p>
+<p>进入解压后的界面，然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo cp cudnn-*-archive/include/cudnn*.h /usr/local/cuda-11.6/include </span><br><span class="line">sudo cp -P cudnn-*-archive/lib/libcudnn* /usr/local/cuda-11.6/lib64 </span><br><span class="line">sudo chmod a+r /usr/local/cuda-11.6/include/cudnn*.h /usr/local/cuda-11.6/lib64/libcudnn*</span><br><span class="line">#下面这个是方便后面opencv配置cuda</span><br><span class="line">sudo cp cudnn-*-archive/include/cudnn*.h /usr/local/cuda/include </span><br><span class="line">sudo cp -P cudnn-*-archive/lib/libcudnn* /usr/local/cuda/lib64 </span><br><span class="line">sudo chmod a+r /usr/local/cuda-11.6/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>之后查看<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=CUDNN&amp;spm=1001.2101.3001.7020">CUDNN</a>版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /usr/local/cuda-11.6/include/cudnn_version.h | grep CUDNN_MAJOR -A 2</span><br></pre></td></tr></table></figure>
+<h3 id="CUDNN依赖"><a href="#"></a>CUDNN依赖</h3>
+<p>依赖网站：<a target="_blank" rel="noopener" href="https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/" title="Index of /compute/cuda/repos/ubuntu2004/x86_64">Index of /compute/cuda/repos/ubuntu2004/x86_64</a></p>
+<p>找到对应的依赖（一个带dev一个不带）</p>
+<p>或者使用命令行进行下载</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/libcudnn8_8.4.1.50-1+cuda11.6_amd64.deb</span><br><span class="line"> </span><br><span class="line">wget https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/libcudnn8-dev_8.4.1.50-1+cuda11.6_amd64.deb</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>安装依赖</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/libcudnn8_8.4.1.50-1+cuda11.6_amd64.deb</span><br><span class="line"> </span><br><span class="line">wget https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/libcudnn8-dev_8.4.1.50-1+cuda11.6_amd64.deb</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<h2 id="五-Tensortrt的安装"><a href="#"></a>五.Tensortrt的安装</h2>
+<h3 id="1-下载"><a href="#"></a>1.下载</h3>
+<p>这里是tensorrt的下载连接:<a target="_blank" rel="noopener" href="https://developer.nvidia.com/nvidia-tensorrt-8x-download">https://developer.nvidia.com/nvidia-tensorrt-8x-download</a></p>
+<p>下载tar包解压后的到的连接</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/0e435b363bc446c886e43e5b21292e23_54c963cc1b2a438ab.png" alt=""></p>
+<p>修改环境变量:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1.  sudo gedit ~/.bashrc </span><br></pre></td></tr></table></figure>
+<p>在文件末尾加入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export LD_LIBRARY_PATH=$LD_LIBRARY_PATH：/home/stand/Software/TensorRT-8.4.1.5/lib</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+<h3 id="2-测试样例"><a href="#"></a>2. 测试样例</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd TensorRT-8.4.1.5/samples/sampleMNIST</span><br><span class="line">make -j16</span><br><span class="line">cd ../../bin/</span><br><span class="line">./sample_mnist</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这样就成功了</p>
+<img width="1200" height="1242" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/3eb8c7cdcede4fdead0f60fb785bad68_4fb7033780c548148.png" class="jop-noMdConv">
+<h3 id="3-python部分的安装"><a href="#"></a>3.python部分的安装</h3>
+<p>用miniconda创建完环境之后</p>
+<p>直接pip目录中的uff，python(注意选择和你conda创建python的版本相对应) ，graphsurgeon下的whl就可以了</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5fdfb1069d5c433781f5f8abf04410eb_48a6f8c2ba974c2db.png" alt=""></p>
+<p>我这里是一次就成功了可能出现问题的话可以参考这位大佬:<a target="_blank" rel="noopener" href="https://blog.csdn.net/lilin020401/article/details/126475351#t4" title="Ubuntu22.04 下安装驱动、CUDA、cudnn以及TensorRT_lilin020401的博客-CSDN博客">Ubuntu22.04 下安装驱动、CUDA、cudnn以及TensorRT_lilin020401的博客-CSDN博客</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/cuda/" rel="tag"># cuda</a>
+              <a href="/tags/cudnn/" rel="tag"># cudnn</a>
+              <a href="/tags/tensorrt/" rel="tag"># tensorrt</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/06/hexo%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/hexo%E4%B8%AA%E4%BA%BA%E7%95%8C%E9%9D%A2%E7%BE%8E%E5%8C%96/" rel="prev" title="hexo美化">
+      <i class="fa fa-chevron-left"></i> hexo美化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/ubuntu22%E9%83%A8%E7%BD%B2c++%20%E9%85%8D%E7%BD%AEopencv4.5.5,opencv_contrib4.5.5,%E4%BB%A5%E5%8F%8A/" rel="next" title="ubuntu22部署c++ 配置opencv4.5.5,opencv_contrib4.5.5,以及opencv下的cuda（cuda11.6,cudnn8.4.1）">
+      ubuntu22部署c++ 配置opencv4.5.5,opencv_contrib4.5.5,以及opencv下的cuda（cuda11.6,cudnn8.4.1） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+    
+  
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">ubuntu22 pycharm,cuda,cudnn，tensorrt的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-pycharm%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.</span> <span class="nav-text">一.pycharm的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-minconda%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.2.</span> <span class="nav-text">二.minconda的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89-Nvdia%E6%98%BE%E5%8D%A1%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.3.</span> <span class="nav-text">三.Nvdia显卡的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%EF%BC%9ACUDA%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.4.</span> <span class="nav-text">四：CUDA的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CUDA%E4%B8%8B%E8%BD%BD"><span class="nav-number">1.4.1.</span> <span class="nav-text">CUDA下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEcuda%E7%8E%AF%E5%A2%83"><span class="nav-number">1.4.2.</span> <span class="nav-text">配置cuda环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUDA%E7%9A%84%E6%B5%8B%E8%AF%95"><span class="nav-number">1.4.3.</span> <span class="nav-text">CUDA的测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B-CUDANN%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.5.</span> <span class="nav-text">四.CUDANN的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CUDANN%E4%B8%8B%E8%BD%BD"><span class="nav-number">1.5.1.</span> <span class="nav-text">CUDANN下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUDNN%E4%BE%9D%E8%B5%96"><span class="nav-number">1.5.2.</span> <span class="nav-text">CUDNN依赖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94-Tensortrt%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.</span> <span class="nav-text">五.Tensortrt的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%8B%E8%BD%BD"><span class="nav-number">1.6.1.</span> <span class="nav-text">1.下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%B5%8B%E8%AF%95%E6%A0%B7%E4%BE%8B"><span class="nav-number">1.6.2.</span> <span class="nav-text">2. 测试样例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-python%E9%83%A8%E5%88%86%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.3.</span> <span class="nav-text">3.python部分的安装</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YueSang"
+      src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/微信图片_20240109114649.jpg">
+  <p class="site-author-name" itemprop="name">YueSang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/YueSangShuai" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;YueSangShuai" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/0102hanyue@gmail.com" title="E-Mail → 0102hanyue@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="">
+    <a target="_blank" class="social-link" href="/atom.xml" style="color: burlywood;">
+      <span class="icon">
+        <i class="fa fa-rss"></i>
+      </span>
+      <span class="label">RSS</span>
+    </a>
+  </div>
+
+
+    <div class="links-of-blogroll motion-element links-of-blogroll-block">
+        <div class="links-of-blogroll-title recent-posts-title">
+	    <i class="fa fa-history " aria-hidden="true"></i>
+            近期文章
+	</div>
+	<ul class="links-of-blogroll-list recent-posts-list">
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E7%9A%84%E6%96%B9%E5%B7%AE/" title="高斯函数的方差" target="">
+		    高斯函数的方差
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4/" title="向量空间" target="">
+		    向量空间
+		    </a>
+		</li>
+	        <li class="my-links-of-blogroll-item">
+		    <a href="/2025/03/06/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E9%AB%98%E6%96%AF%E5%87%BD%E6%95%B0%E5%B9%B3%E6%96%B9%E7%9A%84%E6%9C%9F%E6%9C%9B/" title="高斯函数平方的期望" target="">
+		    高斯函数平方的期望
+		    </a>
+		</li>
+	</ul>
+    </div>
+
+
+
+	<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+	<div class="widget-wrap">
+		<div id="myCanvasContainer" class="widget tagcloud">
+			<canvas width="300" height="300" id="resCanvas" style="width:100%">
+				<ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOU/" rel="tag">IOU</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jeston-nx/" rel="tag">Jeston nx</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Openvino/" rel="tag">Openvino</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Yolo/" rel="tag">Yolo</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cuda/" rel="tag">cuda</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cudnn/" rel="tag">cudnn</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv/" rel="tag">opencv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/opencv-contrib/" rel="tag">opencv_contrib</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorrt/" rel="tag">tensorrt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1/" rel="tag">交叉熵损失</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BC%98%E5%8C%96%E5%99%A8/" rel="tag">优化器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a><span class="tag-list-count">5</span></li></ul>
+			</canvas>
+		</div>
+	</div>
+
+
+      </div>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YueSang</span>
+</div>
+<script defer data-pjax src="/custom/js/footer/fish.js"></script>
+<link rel="stylesheet" href="/custom/css/footer/forter.css">
+<link rel="stylesheet" href="/custom/css/footer/fish_transparent.css">
+
+
+<script defer data-pjax src="/custom/js/footer/runtime.js"></script>
+<div id="runtime_border"></div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '30px',
+  right: 'unset',
+  left: '80px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'Ti1kR0paKsHBzpXZnrhRIx8g-gzGzoHsz',
+      appKey     : 'fmLUyLzUTPYCOpcwoBJqCcSz',
+      placeholder: "来了老弟",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+    </div>
+</body>
+</html>

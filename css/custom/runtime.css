@@ -1,0 +1,52 @@
+/*电子钟字体*/
+@font-face {
+  font-family: 'UnidreamLED';
+  src: url("https://npm.elemecdn.com/akilar-candyassets/fonts/UnidreamLED.ttf");
+  font-display: swap;
+}
+div#runtime {
+  width: 180px;
+  margin: auto;
+  color: #fff;
+  padding-inline: 5px;
+  border-radius: 10px;
+  background-color: rgba(0,0,0,0.7);
+  font-family: 'UnidreamLED';
+}
+.darkmode--activated div#runtime {
+  color: #28b4c8;
+  box-shadow: 0 0 5px rgba(28,69,218,0.71);
+  animation: flashlight 1s linear infinite alternate;
+}
+@-moz-keyframes flashlight {
+  from {
+    box-shadow: 0 0 5px #1478d2;
+  }
+  to {
+    box-shadow: 0 0 2px #1478d2;
+  }
+}
+@-webkit-keyframes flashlight {
+  from {
+    box-shadow: 0 0 5px #1478d2;
+  }
+  to {
+    box-shadow: 0 0 2px #1478d2;
+  }
+}
+@-o-keyframes flashlight {
+  from {
+    box-shadow: 0 0 5px #1478d2;
+  }
+  to {
+    box-shadow: 0 0 2px #1478d2;
+  }
+}
+@keyframes flashlight {
+  from {
+    box-shadow: 0 0 5px #1478d2;
+  }
+  to {
+    box-shadow: 0 0 2px #1478d2;
+  }
+}
