@@ -106,117 +106,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Openvino量化模型推理 Fp32 Fp16 int8</title>
-    <url>/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1>Openvino量化模型推理 Fp32 Fp16 int8</h1>
-<p>我忘记我是哪个版本的<a href="https://so.csdn.net/so/search?q=openvino&amp;spm=1001.2101.3001.7020">openvino</a>了，这里记录一下我将模型从onnx转换到Openvino的Ir模型以及最后的int8,Openvino比Tensorrt的泛化性要高，Tensorrt的量化是模型放到不同的机子上面都需要重新量化一次但是Openvino没有这个缺点。</p>
-<p>我的OpenVino采用的是源码编译的这里采用的是python代码，之后可能会写一份C++代码放上去,先上才艺</p>
-<h2 id="一-将模型转换成onnx模型"><a href="#"></a>一.将模型转换成<a href="https://so.csdn.net/so/search?q=onnx%E6%A8%A1%E5%9E%8B&amp;spm=1001.2101.3001.7020">onnx模型</a></h2>
-<p>这里我采用的是pytorch模型文件转成onnx</p>
-<p>模型结构包括参数保存</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import torch</span><br><span class="line">import torch.nn</span><br><span class="line">import os</span><br><span class="line">import sys</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">def export(model_path):</span><br><span class="line">    net = torch.load(</span><br><span class="line">        model_path,</span><br><span class="line">        map_location=torch.device(&#x27;cpu&#x27;),</span><br><span class="line">    )</span><br><span class="line">    net.eval()</span><br><span class="line">    #这里需要指定你输入和输出的名字方便后面推理</span><br><span class="line">    input_names = [&#x27;input&#x27;]</span><br><span class="line">    output_names = [&#x27;output&#x27;]</span><br><span class="line">    #这里需要确定模型的输入</span><br><span class="line">    x = torch.randn(1, 3, 224, 224)</span><br><span class="line"> </span><br><span class="line">    torch.onnx.export(</span><br><span class="line">        net,</span><br><span class="line">        x,</span><br><span class="line">        os.path.join(</span><br><span class="line">            os.path.split(model_path)[0],</span><br><span class="line">            &#x27;best.onnx&#x27;,</span><br><span class="line">        ),</span><br><span class="line">        input_names=input_names,</span><br><span class="line">        output_names=output_names,</span><br><span class="line">        verbose=False,</span><br><span class="line">        opset_version=12,</span><br><span class="line">    )</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    model_path = &#x27;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/best.pt&#x27;</span><br><span class="line">    export(model_path)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>模型采用字典保存</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import os</span><br><span class="line">import torch</span><br><span class="line">from swin_transformer import *</span><br><span class="line">from collections import OrderedDict</span><br><span class="line"> </span><br><span class="line">DROP_PATH_RATE = 0.5</span><br><span class="line">EMBED_DIM = 192</span><br><span class="line">DEPTHS = [2, 2, 18, 2]</span><br><span class="line">NUM_HEADS = [6, 12, 24, 48]</span><br><span class="line">WINDOW_SIZE = 7</span><br><span class="line"> </span><br><span class="line">model_path = &#x27;&#x27;</span><br><span class="line"> </span><br><span class="line">checkpoint = torch.load(</span><br><span class="line">    model_path,</span><br><span class="line">    map_location=&#x27;cpu&#x27;,</span><br><span class="line">)</span><br><span class="line">model = SwinTransformer(</span><br><span class="line">    img_size=224,</span><br><span class="line">    patch_size=4,</span><br><span class="line">    in_chans=3,</span><br><span class="line">    num_classes=0,</span><br><span class="line">    embed_dim=EMBED_DIM,</span><br><span class="line">    depths=DEPTHS,</span><br><span class="line">    num_heads=NUM_HEADS,</span><br><span class="line">    window_size=WINDOW_SIZE,</span><br><span class="line">    mlp_ratio=4,</span><br><span class="line">    qkv_bias=True,</span><br><span class="line">    qk_scale=None,</span><br><span class="line">    drop_rate=0.0,</span><br><span class="line">    drop_path_rate=DROP_PATH_RATE,</span><br><span class="line">    ape=False,</span><br><span class="line">    patch_norm=True,</span><br><span class="line">)</span><br><span class="line"> </span><br><span class="line">new_state_dict = OrderedDict()</span><br><span class="line">for k, v in checkpoint[&#x27;model&#x27;].items():</span><br><span class="line">    if k != &#x27;head.weight&#x27;:</span><br><span class="line">        new_state_dict[k] = v</span><br><span class="line">    else:</span><br><span class="line">        print(k, v.shape)</span><br><span class="line">model.load_state_dict(new_state_dict, strict=False)</span><br><span class="line"> </span><br><span class="line">model.eval()</span><br><span class="line"> </span><br><span class="line">input_names = [&#x27;input&#x27;]</span><br><span class="line">output_names = [&#x27;output&#x27;]</span><br><span class="line">x = torch.randn(1, 3, 224, 224)</span><br><span class="line"> </span><br><span class="line">torch.onnx.export(</span><br><span class="line">    model,</span><br><span class="line">    x,</span><br><span class="line">    os.path.join(</span><br><span class="line">        os.path.split(model_path)[0],</span><br><span class="line">        &#x27;best.onnx&#x27;,</span><br><span class="line">    ),</span><br><span class="line">    input_names=input_names,</span><br><span class="line">    output_names=output_names,</span><br><span class="line">    verbose=False,</span><br><span class="line">    opset_version=12,</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>总结来说就是把字典导入到模型的结构里面然后在进行onnx的转换这部分可以自己网上找找教程听多的</p>
-<h2 id="二-模型从onnx模型转ir模型"><a href="#"></a>二.模型从onnx模型转ir模型</h2>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/397c40c6ae4a4094a2e8dc88cda85f48_cbd8964035d941349.png" alt=""></p>
-<p> 这里如果你是用python直接pip的话可以直接进入conda的环境去使用她，如果你是源码编译OpenVino的话可能要进入那个目录下载一下，这里我个人觉得如果你只是用来测试的话Python其实就很够用了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python mo_onnx.py --input_model &lt;输入模型路经&gt; --output_dir &lt;输出模型路经&gt;</span><br></pre></td></tr></table></figure>
-<p><strong>（如果需要量化到FP16的话需要额外指定参数 --compress_to_fp16）</strong></p>
-<p>首先先将你的模型转换到Ir格式，这里放一下mo的参数你们可以有道翻译一下我个人英语不太好这里就不解释了</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mo -h #可以查看mo的参数</span><br><span class="line">#或者是进入到mo.py所在的文件夹然后</span><br><span class="line">python mo.py -h</span><br></pre></td></tr></table></figure>
-<p> 之后测试一下转换完的模型推理速度</p>
-<p>进入Openvino这个文件夹</p>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/41d7baf4604c49d39d32700025ce258a_3e8eadeb2477454a9.png" alt=""></p>
-<p> 然后查看一下你模型量化的结果（FP32）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python ./benchmark_app.py -m &lt;量化后的xml文件&gt; -d CPU -api async -i &lt;选择图片路径&gt; -b 1</span><br></pre></td></tr></table></figure>
-<p>其中 <strong>-d</strong>指定的是你的设备 -api指定的是你的推理模式（同步还是异步推理）</p>
-<p>看一下FP32模型的速度</p>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/9dbc17d300f143568c3c598f768cc605_dbe4da939502499a9.png" alt=""></p>
-<p> FP16</p>
-<img width="598" height="240" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bec68d6b955a4401bedf8d1c54e700c6_f4b0436799124d78a.png" class="jop-noMdConv">
-<p> ONNX模型推理速度</p>
-<img width="870" height="240" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c25101469a364d8e9d8bea60f3dd3142_2ded076e1fd74ad0b.png" class="jop-noMdConv">
-<h2 id="三，Int8量化"><a href="#"></a> 三，<a href="https://so.csdn.net/so/search?q=Int8&amp;spm=1001.2101.3001.7020">Int8</a>量化</h2>
-<p>在转换之前，我们需要准备一下数据（在量化过程中会使用到）。对于自己的数据集首先转换成openvino支持的数据格式，这里使用imagenet数据集格式，对于分类任务需要annotation.txt文件以及labels.txt共两个文件。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── dataset:： 存放数据集的根目录</span><br><span class="line">│     ├── 1：         </span><br><span class="line">│     ├── 2：     </span><br><span class="line">│     ├── 3：         </span><br><span class="line">│     ├── 4：    </span><br><span class="line">│     └── .... ：              </span><br></pre></td></tr></table></figure>
-<p>这里给一个生成annotation.txt和labels.txt脚本（霹雳趴拉导师那边抄的）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import os</span><br><span class="line">import glob</span><br><span class="line"> </span><br><span class="line">image_dir = &quot;/your_dataset_dir&quot;</span><br><span class="line">assert os.path.exists(image_dir), &quot;image dir does not exist...&quot;</span><br><span class="line"> </span><br><span class="line">img_list = glob.glob(os.path.join(image_dir, &quot;*&quot;, &quot;*.jpg&quot;))</span><br><span class="line">assert len(img_list) &gt; 0, &quot;No images(.jpg) were found in image dir...&quot;</span><br><span class="line"> </span><br><span class="line">classes_info = os.listdir(image_dir)</span><br><span class="line">classes_info.sort()</span><br><span class="line">classes_dict = &#123;&#125;</span><br><span class="line"> </span><br><span class="line"># create label file</span><br><span class="line">with open(&quot;my_labels.txt&quot;, &quot;w&quot;) as lw:</span><br><span class="line">    # 注意，没有背景时，index要从0开始</span><br><span class="line">    for index, c in enumerate(classes_info, start=0):</span><br><span class="line">        txt = &quot;&#123;&#125;:&#123;&#125;&quot;.format(index, c)</span><br><span class="line">        if index != len(classes_info):</span><br><span class="line">            txt += &quot;\n&quot;</span><br><span class="line">        lw.write(txt)</span><br><span class="line">        classes_dict.update(&#123;c: str(index)&#125;)</span><br><span class="line">print(&quot;create my_labels.txt successful...&quot;)</span><br><span class="line"> </span><br><span class="line"># create annotation file</span><br><span class="line">with open(&quot;my_annotation.txt&quot;, &quot;w&quot;) as aw:</span><br><span class="line">    for img in img_list:</span><br><span class="line">        img_classes = classes_dict[img.split(&quot;/&quot;)[-2]]</span><br><span class="line">        txt = &quot;&#123;&#125; &#123;&#125;&quot;.format(img, img_classes)</span><br><span class="line">        if index != len(img_list):</span><br><span class="line">            txt += &quot;\n&quot;</span><br><span class="line">        aw.write(txt)</span><br><span class="line">print(&quot;create my_annotation.txt successful...&quot;)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="3-1-模型测试"><a href="#"></a>3.1 模型测试</h3>
-<p>首先先测试FP32和FP16的模型精度，先准备一份yaml文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">models:</span><br><span class="line">  - name: mobileNetV3Fp32</span><br><span class="line">    launchers:</span><br><span class="line">      #下面指定运行的框架 dlsdk就是openvino， 也可以是tensorflow或者其他框架</span><br><span class="line">      #model/weights是要测试的模型文件名</span><br><span class="line">      #adapter是告诉accuracy checker模型的输出是目标分类还是目标识别或者其他的输出</span><br><span class="line">      - framework: openvino</span><br><span class="line">        model: /home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml</span><br><span class="line">        weights: /home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin</span><br><span class="line">        adapter: classification</span><br><span class="line"> </span><br><span class="line">    datasets:</span><br><span class="line">      #下面这部分是有关数据集的路径，数据集的格式(imagenet，VOC或者其他)以及标注文件的名字</span><br><span class="line">      - name: Flower</span><br><span class="line">        data_source: /mnt/hdd-4t/data/hanyue/mobileNet/flower</span><br><span class="line">        annotation_conversion:</span><br><span class="line">          converter: imagenet</span><br><span class="line">          annotation_file: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/my_annotation.txt&quot;</span><br><span class="line">        #预处理告诉ac_checker工具在把数据集图片送进模型前要做那些预处理，比如缩放，剪切或者调整RGB/BGR顺序之类</span><br><span class="line">        reader: opencv_imread # default setting</span><br><span class="line">        preprocessing:</span><br><span class="line">          - type: resize</span><br><span class="line">            size: 256</span><br><span class="line">            aspect_ratio_scale: greater</span><br><span class="line">          - type: crop</span><br><span class="line">            size: 224</span><br><span class="line">          - type: bgr_to_rgb # bgr format in opencv</span><br><span class="line">          - type: normalization</span><br><span class="line">            # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well</span><br><span class="line">            mean: (123.675, 116.28, 103.53)</span><br><span class="line">            std: (58.395, 57.12, 57.375)</span><br><span class="line">        #这里定义统计准确度用的算法，这里要看2种准确度，一个是top1的，还一个是top5的</span><br><span class="line">        metrics:</span><br><span class="line">          - name: accuracy @ top1</span><br><span class="line">            type: accuracy</span><br><span class="line">            top_k: 1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>model：存放你的xml的路径，在精度测试中可以先不用放weight,这个model也可以是你的onnx文件</p>
-<p>adapter:选择你的网络类型我这里是分类网络，openvino还支持目标检测网络具体可以看看config下面的配置</p>
-<p>datasource:下面存放的是你的数据集的根路径（这里有个坑就是这个文件夹下面存放的图片路径要和你上面生成的annotion.txt对应起来包括你的类别还有路径，相当于就是你把你数据集所有的图片全部放在这个路径下面，验证的时候由annotion.txt里面的东西验证）</p>
-<p>convert:我直接写imagenet没有什么影响</p>
-<p>preprocessing：里面的是写的是你预处理操作（记得颜色通道的转换不然的话精确度一直和训练的时候验证都是错的）这里有的预处理很傻逼我官网也没有找到如果有人找到的话欢迎评论区和我说一声哈哈哈哈哈</p>
-<p> metrics:定义的是评价指标这里是分类网络所以我采用的是accuary这里的top1表示，评分排名前1中能正确分出的概率。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">accuracy_check -c 你的yaml文件 -s ./ -td CPU</span><br></pre></td></tr></table></figure>
-<p>可以得到正确率了，之后int8量化也需要用到这个进行评估。</p>
-<h3 id="3-2-yaml文件以及json文件的准备"><a href="#"></a>3.2.yaml文件以及json文件的准备</h3>
-<p>这里int8有两种量化方式一种是全int8量化还有一种是混精度量化首先先准备一下model.yaml文件</p>
-<p>这里的yaml文件和刚刚那个yaml文件大差不差</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">models:</span><br><span class="line">  - name: mobileNetV3</span><br><span class="line">    launchers:</span><br><span class="line">      - framework: dlsdk</span><br><span class="line">        device: CPU</span><br><span class="line">        adapter: classification</span><br><span class="line">    #定义数据集</span><br><span class="line">    datasets:</span><br><span class="line">      - name: classification_dataset</span><br><span class="line">        #定义数据集路径</span><br><span class="line">        data_source: /mnt/hdd-4t/data/hanyue/mobileNet/flower</span><br><span class="line">        #定义annotation路径</span><br><span class="line">        annotation_conversion:</span><br><span class="line">          converter: imagenet</span><br><span class="line">          annotation_file: /home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/my_annotation.txt</span><br><span class="line"> </span><br><span class="line">        reader: opencv_imread # default setting</span><br><span class="line">        #这里需要提前定义预处理</span><br><span class="line">        preprocessing:</span><br><span class="line">          - type: resize</span><br><span class="line">            size: 256</span><br><span class="line">            aspect_ratio_scale: greater</span><br><span class="line">          - type: crop</span><br><span class="line">            size: 224</span><br><span class="line">          - type: bgr_to_rgb # bgr format in opencv</span><br><span class="line">          - type: normalization</span><br><span class="line">            # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well</span><br><span class="line">            mean: (123.675, 116.28, 103.53)</span><br><span class="line">            std: (58.395, 57.12, 57.375)</span><br><span class="line">        metrics:</span><br><span class="line">          - name: accuracy @ top1</span><br><span class="line">            type: accuracy</span><br><span class="line">            top_k: 1</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>然后就是json文件的编写</p>
-<h4 id="3-2-1-DefaultQuantization"><a href="#"></a>3.2.1 DefaultQuantization</h4>
-<p>这个应该是openvino中的全int8的量化</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">        &quot;model_name&quot;: &quot;MobileNetV3&quot;, </span><br><span class="line">        &quot;model&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml&quot;, </span><br><span class="line">        &quot;weights&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin&quot; </span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;engine&quot;: &#123;</span><br><span class="line">        &quot;config&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/defualtQuantization/model.yaml&quot;</span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;compression&quot;: &#123;</span><br><span class="line">        &quot;target_device&quot;: &quot;CPU&quot;, </span><br><span class="line">                                </span><br><span class="line">        &quot;algorithms&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;name&quot;: &quot;DefaultQuantization&quot;, </span><br><span class="line">                &quot;params&quot;: &#123;</span><br><span class="line">                    &quot;preset&quot;: &quot;performance&quot;,                      </span><br><span class="line">                    &quot;stat_subset_size&quot;: 300  </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>model：里面定义的是你最开始量化后的xml和bin的路径以及指定你的设备</p>
-<p>engine:就是你刚刚写好的yaml文件了</p>
-<p>target_device：就是你要量化的设备</p>
-<p>algorithms –</p>
-<p>                        name：这里指定的是你的量化方式</p>
-<p>                        preset：我也不知道什么意思</p>
-<p>                        stat_subset_size: 好像是采取多少张数据集的意思</p>
-<h4 id="3-2-2-AccuracyAwareQuantization"><a href="#"></a>3.2.2 AccuracyAwareQuantization</h4>
-<p>先放一下json文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">        &quot;model_name&quot;: &quot;MobileNetV3&quot;, </span><br><span class="line">        &quot;model&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml&quot;, </span><br><span class="line">        &quot;weights&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin&quot; </span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;engine&quot;: &#123;</span><br><span class="line">        &quot;config&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/AccuracyAwareQuantization/model.yaml&quot;</span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;compression&quot;: &#123;</span><br><span class="line">        &quot;target_device&quot;: &quot;CPU&quot;, </span><br><span class="line">                                </span><br><span class="line">        &quot;algorithms&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;name&quot;: &quot;AccuracyAwareQuantization&quot;, </span><br><span class="line">                &quot;params&quot;: &#123;</span><br><span class="line">                    &quot;preset&quot;: &quot;performance&quot;,                      </span><br><span class="line">                    &quot;stat_subset_size&quot;: 300  ,</span><br><span class="line">                    &quot;maximal_drop&quot;: 0.1 </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>想比于DefaultQuantization就是name里面那个不一样以及多了一个maximal_drop,这个参数的意义是运行你的模型下降多少指标</p>
-<p>准确度的测试脚本可以用我3.1讲到的那个部分来测试只要把模型替换掉就OK了</p>
-<p>但是Openvino的量化好像只支撑分类网络和目标检测，后续找个时间写一下有关Pytorch自带的QAT的量化方法</p>
-]]></content>
-      <categories>
-        <category>环境配置</category>
-      </categories>
-      <tags>
-        <tag>Openvino</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Ubuntu19 Openvion cmake源码编译</title>
-    <url>/2025/03/06/Openvino/Ubuntu19%20Openvion%20cmake%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91_cmake%20%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAopenvino%E9%A1%B9%E7%9B%AE-C/</url>
-    <content><![CDATA[<h1>Ubuntu19 Openvion cmake源码编译</h1>
-<p>苦逼打工人<a href="https://so.csdn.net/so/search?q=Ubuntu&amp;spm=1001.2101.3001.7020">Ubuntu</a>服务器没有可视化界面，而且服务器用的是Ubuntu19，官网好像只支持18，20的安装，没办法为了量化这些模型只好cmake编译了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/openvinotoolkit/openvino.git</span><br><span class="line">cd openvino</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>解压后的结构目录</p>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5a8d3ae6a20e40e6b93287e96f8e8a34_2e068f8ccd0e4123a.png" alt=""></p>
-<p>有的包需要我们去github下载但是公司的机子不能科学上网但是Openvino官方提供了人性的gitee安装的脚本。进入Openvino的目录之后</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chmod +x scripts/submodule_update_with_gitee.sh</span><br><span class="line">./scripts/submodule_update_with_gitee.sh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>然后安装外部依赖</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chmod +x install_build_dependencies.sh</span><br><span class="line">sudo ./install_build_dependencies.sh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>然后可以开始狗蛋的cmake编译了，先用这个试试水</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cmake -DCMAKE_BUILD_TYPE=Release ..</span><br><span class="line">make --jobs=$(nproc --all)</span><br></pre></td></tr></table></figure>
-<p>我中间报了一些黄的的警告我没有管他之后</p>
-<p><strong>（python版的openvino好像可以直接pip 安装runtime或者dev包括了onnx转ir的mo_onnx，但是如果要做int8量化的话最好还是编译一下）（记得换成你的python版本）</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#根据自己实际需要我这里需要用到python版本的openvino我才安装的</span><br><span class="line">#如果需要的话可以指定一下位置</span><br><span class="line">cmake -DCMAKE_BUILD_TYPE=Release -DNGRAPH_DEBUG_ENABLE=ON \</span><br><span class="line">-DENABLE_PYTHON=ON \</span><br><span class="line">-DPYTHON_EXECUTABLE=/usr/bin/python3.7 \</span><br><span class="line">-DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.7m.so \</span><br><span class="line">-DPYTHON_INCLUDE_DIR=/usr/include/python3.7 ..   </span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/3d3dcc4c683d494682cdff4c2684d517_87712abb6a8444b2b.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/ecdd776fdfc44f8d9971b5176ad620f8_f2483488a09e40d78.png" alt=""></p>
-<p> 没有报错就好，然后开始编译库</p>
-<p> <img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/359aefa8233449278ae14e7ab0bb1925_e133f89b69294f79a.png" alt=""></p>
-<p>我编译的过程很顺利没有出现什么其他的错误，编译完以后直接</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-<p> 之后就可以快乐的使用Openvino啦</p>
-<p><strong>(经过我测试，我发现如果有python使用需求的小伙伴们可以直接从官网pip下载OpenVino里面的东西有mo.py的转换还有int8模型量化的代码)</strong></p>
-<p>最近还是int8试试水，之后如果可以出一期Openvino量化的教程。</p>
-]]></content>
-      <categories>
-        <category>环境配置</category>
-      </categories>
-      <tags>
-        <tag>Openvino</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Markdown图床</title>
     <url>/2025/03/06/hexo%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/Markdown%E5%9B%BE%E5%BA%8A/</url>
     <content><![CDATA[<h1>Markdown图床</h1>
@@ -526,53 +415,37 @@ yourname改为你的<strong>GitHub的用户名</strong></p>
       </tags>
   </entry>
   <entry>
-    <title>onnxruntime本机交叉编译</title>
-    <url>/2025/04/16/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/onnxruntime%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91/</url>
-    <content><![CDATA[<h2 id="天选之子版本">天选之子版本</h2>
-<p>刚好碰到一个工程需要使用arm64的机子上面使用onnxruntime，但是那台机子没有基本的编译环境，于是就在本机amd64的对onnxruntime库进行交叉编译<br>
-拉取源码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone --branch v1.8.0 --recursive https://github.com/microsoft/onnxruntime.git</span><br></pre></td></tr></table></figure>
-<p>编译代码如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./build.sh \</span><br><span class="line">  --config Release \</span><br><span class="line">  --build \</span><br><span class="line">  --update \</span><br><span class="line">  --build_dir build_arm64 \</span><br><span class="line">  --skip_tests \</span><br><span class="line">  --parallel $(nproc) \</span><br><span class="line">  --build_shared_lib \</span><br><span class="line">  --cmake_extra_defines \</span><br><span class="line">    CMAKE_TOOLCHAIN_FILE=./cmake-arm64-toolchain.cmake </span><br></pre></td></tr></table></figure>
-<p>编译的时候可能会下的很慢可以挂个代理<br>
-其中cmake-arm64-toolchain.cmake 如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># cmake-arm64-toolchain.cmake</span><br><span class="line">SET(CMAKE_SYSTEM_NAME Linux)</span><br><span class="line">SET(CMAKE_SYSTEM_PROCESSOR aarch64)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">set(ZLIB_ROOT /home/test/Desktop/yuesang/c++/3dpart/zlib)</span><br><span class="line">set(CMAKE_INCLUDE_PATH $&#123;ZLIB_ROOT&#125;/include)</span><br><span class="line">set(CMAKE_LIBRARY_PATH $&#123;ZLIB_ROOT&#125;/lib)</span><br><span class="line"># 指定工具链前缀路径</span><br><span class="line">set(TOOLCHAIN_ROOT /home/test/Desktop/yuesang/c++/3dpart/gcc-10.2.1-20210303-sigmastar-glibc-x86_64_aarch64-linux-gnu)</span><br><span class="line"></span><br><span class="line">set(CMAKE_C_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-gcc)</span><br><span class="line">set(CMAKE_CXX_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-g++)</span><br><span class="line"></span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)</span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)</span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)</span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>#这里我是缺少zlib才需要的如果没有可以不用加重点是设置TOOLCHAIN_ROOT就是你的编译器相关的，本地也可以下载arrch64相关的编译器，如果是本地的就这样</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)</span><br><span class="line">set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)</span><br></pre></td></tr></table></figure>
-<p>如果build成功那么恭喜你，如果没有成功接着往下看，我把我编译碰到的问题先都罗列出来</p>
-<h2 id="倒霉蛋一号">倒霉蛋一号</h2>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//a79f3eec63052fdf15ce9570a4d5efe4.png" alt="a79f3eec63052fdf15ce9570a4d5efe4.png"><br>
-这是第一个错误缺少zlib库，你可以去下载一下<a href="https://zlib.net/">zlib</a><br>
-然后编译一下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd zlib-1.2.13</span><br><span class="line">mkdir build-arm64 &amp;&amp; cd build-arm64</span><br><span class="line"></span><br><span class="line">cmake .. \</span><br><span class="line">  -DCMAKE_TOOLCHAIN_FILE=../toolchain-zlib.cmake \</span><br><span class="line">  -DCMAKE_INSTALL_PREFIX=/home/test/zlib-arm64</span><br><span class="line"></span><br><span class="line">make -j$(nproc)</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-<p>toolchain-zlib.cmake跟上面那个差不多自己设置一下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># toolchain-zlib.cmake</span><br><span class="line"># 用于使用 sigmastar 交叉编译器编译 zlib 给 aarch64 (ARM64)</span><br><span class="line"></span><br><span class="line"># 设置目标平台为 ARM64 Linux</span><br><span class="line">set(CMAKE_SYSTEM_NAME Linux)</span><br><span class="line">set(CMAKE_SYSTEM_PROCESSOR aarch64)</span><br><span class="line"></span><br><span class="line"># 设置交叉编译器路径</span><br><span class="line">set(TOOLCHAIN_ROOT)</span><br><span class="line"></span><br><span class="line"># 设置 C/C++ 编译器</span><br><span class="line">set(CMAKE_C_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-gcc)</span><br><span class="line">set(CMAKE_CXX_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-g++)</span><br><span class="line"></span><br><span class="line"># 禁用默认查找主机路径</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH $&#123;TOOLCHAIN_ROOT&#125;)</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)</span><br><span class="line"></span><br><span class="line"># 可选：生成静态库（如需 .a 文件）</span><br><span class="line">set(BUILD_SHARED_LIBS OFF)</span><br><span class="line"></span><br><span class="line"># 启用 Position Independent Code（为了方便后续链接进 ONNX Runtime）</span><br><span class="line">set(CMAKE_POSITION_INDEPENDENT_CODE ON)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>然后查看我天选之子版的说明</p>
-<h2 id="倒霉蛋二号">倒霉蛋二号</h2>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//d6708e500ec87edfb62d8aa3cdd51644.png" alt="d6708e500ec87edfb62d8aa3cdd51644.png"><br>
-这个错误一度把我搞到崩溃，本来想用docker的，但是docker的网络一致没弄好，然后配置docker的时候下了一个qemu-aarch64然后居然就能通过了，你说屌不屌<br>
-直接下载</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo apt install qemu-user qemu-user-static</span><br></pre></td></tr></table></figure>
-<h2 id="倒霉蛋三号">倒霉蛋三号</h2>
-<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//716531467da86fc1f8bdb3324dad8f8b.png" alt="716531467da86fc1f8bdb3324dad8f8b.png"><br>
-解决了上面那个问题又碰到了这个，因为我的gnu没有装在本机导致qume-arrch64找不到相关的依赖所以你还需要设置一下他的路径</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export QEMU_LD_PREFIX=</span><br></pre></td></tr></table></figure>
-<p>这个是一次性的或者土办法，直接用ln -s软连接也可以</p>
-<h2 id="倒霉蛋四号">倒霉蛋四号</h2>
-<p>json库有异常<br>
-<img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//79e04aaffa98e173006e77603cc0343c.png" alt="79e04aaffa98e173006e77603cc0343c.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd ./onnxruntime/cmake/external/json</span><br><span class="line"></span><br><span class="line">git fetch</span><br><span class="line">git checkout v3.9.1  # 或者使用 master 分支</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>然后cd到你onnxruntime路径下面</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rm -rf .git/modules/cmake/external/json</span><br><span class="line"></span><br><span class="line"># 删除实际子模块目录</span><br><span class="line">rm -rf cmake/external/json</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>最后进入到cmake/external下面把json下在下来</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone --branch v3.9.1 https://github.com/nlohmann/json.git cmake/external/json</span><br></pre></td></tr></table></figure>
-<p>至此编译解释，我在这里提一句，我写文章的意义是在于给自己看，写出来的途中顺便能帮到一些人，对于某些平台明明就是一个很简单的东西，但是非得要vip文章或者收费，十多莲花剩一朵。</p>
+    <title>Ubuntu19 Openvion cmake源码编译</title>
+    <url>/2025/03/06/Openvino/Ubuntu19%20Openvion%20cmake%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91_cmake%20%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAopenvino%E9%A1%B9%E7%9B%AE-C/</url>
+    <content><![CDATA[<h1>Ubuntu19 Openvion cmake源码编译</h1>
+<p>苦逼打工人<a href="https://so.csdn.net/so/search?q=Ubuntu&amp;spm=1001.2101.3001.7020">Ubuntu</a>服务器没有可视化界面，而且服务器用的是Ubuntu19，官网好像只支持18，20的安装，没办法为了量化这些模型只好cmake编译了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/openvinotoolkit/openvino.git</span><br><span class="line">cd openvino</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>解压后的结构目录</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/5a8d3ae6a20e40e6b93287e96f8e8a34_2e068f8ccd0e4123a.png" alt=""></p>
+<p>有的包需要我们去github下载但是公司的机子不能科学上网但是Openvino官方提供了人性的gitee安装的脚本。进入Openvino的目录之后</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chmod +x scripts/submodule_update_with_gitee.sh</span><br><span class="line">./scripts/submodule_update_with_gitee.sh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后安装外部依赖</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chmod +x install_build_dependencies.sh</span><br><span class="line">sudo ./install_build_dependencies.sh</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后可以开始狗蛋的cmake编译了，先用这个试试水</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cmake -DCMAKE_BUILD_TYPE=Release ..</span><br><span class="line">make --jobs=$(nproc --all)</span><br></pre></td></tr></table></figure>
+<p>我中间报了一些黄的的警告我没有管他之后</p>
+<p><strong>（python版的openvino好像可以直接pip 安装runtime或者dev包括了onnx转ir的mo_onnx，但是如果要做int8量化的话最好还是编译一下）（记得换成你的python版本）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#根据自己实际需要我这里需要用到python版本的openvino我才安装的</span><br><span class="line">#如果需要的话可以指定一下位置</span><br><span class="line">cmake -DCMAKE_BUILD_TYPE=Release -DNGRAPH_DEBUG_ENABLE=ON \</span><br><span class="line">-DENABLE_PYTHON=ON \</span><br><span class="line">-DPYTHON_EXECUTABLE=/usr/bin/python3.7 \</span><br><span class="line">-DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.7m.so \</span><br><span class="line">-DPYTHON_INCLUDE_DIR=/usr/include/python3.7 ..   </span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/3d3dcc4c683d494682cdff4c2684d517_87712abb6a8444b2b.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/ecdd776fdfc44f8d9971b5176ad620f8_f2483488a09e40d78.png" alt=""></p>
+<p> 没有报错就好，然后开始编译库</p>
+<p> <img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/359aefa8233449278ae14e7ab0bb1925_e133f89b69294f79a.png" alt=""></p>
+<p>我编译的过程很顺利没有出现什么其他的错误，编译完以后直接</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<p> 之后就可以快乐的使用Openvino啦</p>
+<p><strong>(经过我测试，我发现如果有python使用需求的小伙伴们可以直接从官网pip下载OpenVino里面的东西有mo.py的转换还有int8模型量化的代码)</strong></p>
+<p>最近还是int8试试水，之后如果可以出一期Openvino量化的教程。</p>
 ]]></content>
       <categories>
         <category>环境配置</category>
       </categories>
       <tags>
-        <tag>onnxruntime</tag>
+        <tag>Openvino</tag>
       </tags>
   </entry>
   <entry>
@@ -581,7 +454,8 @@ yourname改为你的<strong>GitHub的用户名</strong></p>
     <content><![CDATA[<h1>hexo next魔改</h1>
 <p>之前不太懂前端的东西这几天他通过网站稍微学习到了一点css和js如何在hexo里面使用以及F12查看元素。<br>
 首先先给上这个大佬的链接<a href="https://www.fomal.cc/posts/d739261b.html#%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E5%88%87%E6%8D%A2%E5%8A%A8%E7%94%BB2-0">大佬项目项目</a>他用的是butterfly主题，我将里面的内容运用到了next主题上。</p>
-<p>首先先打开主题的<code>config.yml</code>文件<img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e7398747cda91ca8aeb328a876e4587f.png" alt="e7398747cda91ca8aeb328a876e4587f.png"><br>
+<p>首先先打开主题的<code>config.yml</code>文件</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/e7398747cda91ca8aeb328a876e4587f.png" alt="e7398747cda91ca8aeb328a876e4587f.png"><br>
 可以跟我这里一样使用njk文件，这里文件的意思可以chat问一下这里我就不过多赘述了<br>
 首先可以在主站的source下面创建一个_data用来存放刚刚的njk文件，创建一个custom用来存放你定制的css和js文件<br>
 <img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/636950a0d29bae84a66a1d51b5d07297.png" alt="636950a0d29bae84a66a1d51b5d07297.png"><br>
@@ -666,6 +540,133 @@ fps.js文件</p>
       </categories>
       <tags>
         <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Openvino量化模型推理 Fp32 Fp16 int8</title>
+    <url>/2025/03/06/Openvino/Openvino%E9%87%8F%E5%8C%96%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%20Fp32%20Fp16%20int8_openvino%20int8-CSDN%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1>Openvino量化模型推理 Fp32 Fp16 int8</h1>
+<p>我忘记我是哪个版本的<a href="https://so.csdn.net/so/search?q=openvino&amp;spm=1001.2101.3001.7020">openvino</a>了，这里记录一下我将模型从onnx转换到Openvino的Ir模型以及最后的int8,Openvino比Tensorrt的泛化性要高，Tensorrt的量化是模型放到不同的机子上面都需要重新量化一次但是Openvino没有这个缺点。</p>
+<p>我的OpenVino采用的是源码编译的这里采用的是python代码，之后可能会写一份C++代码放上去,先上才艺</p>
+<h2 id="一-将模型转换成onnx模型"><a href="#"></a>一.将模型转换成<a href="https://so.csdn.net/so/search?q=onnx%E6%A8%A1%E5%9E%8B&amp;spm=1001.2101.3001.7020">onnx模型</a></h2>
+<p>这里我采用的是pytorch模型文件转成onnx</p>
+<p>模型结构包括参数保存</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import torch</span><br><span class="line">import torch.nn</span><br><span class="line">import os</span><br><span class="line">import sys</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">def export(model_path):</span><br><span class="line">    net = torch.load(</span><br><span class="line">        model_path,</span><br><span class="line">        map_location=torch.device(&#x27;cpu&#x27;),</span><br><span class="line">    )</span><br><span class="line">    net.eval()</span><br><span class="line">    #这里需要指定你输入和输出的名字方便后面推理</span><br><span class="line">    input_names = [&#x27;input&#x27;]</span><br><span class="line">    output_names = [&#x27;output&#x27;]</span><br><span class="line">    #这里需要确定模型的输入</span><br><span class="line">    x = torch.randn(1, 3, 224, 224)</span><br><span class="line"> </span><br><span class="line">    torch.onnx.export(</span><br><span class="line">        net,</span><br><span class="line">        x,</span><br><span class="line">        os.path.join(</span><br><span class="line">            os.path.split(model_path)[0],</span><br><span class="line">            &#x27;best.onnx&#x27;,</span><br><span class="line">        ),</span><br><span class="line">        input_names=input_names,</span><br><span class="line">        output_names=output_names,</span><br><span class="line">        verbose=False,</span><br><span class="line">        opset_version=12,</span><br><span class="line">    )</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    model_path = &#x27;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/best.pt&#x27;</span><br><span class="line">    export(model_path)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>模型采用字典保存</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import os</span><br><span class="line">import torch</span><br><span class="line">from swin_transformer import *</span><br><span class="line">from collections import OrderedDict</span><br><span class="line"> </span><br><span class="line">DROP_PATH_RATE = 0.5</span><br><span class="line">EMBED_DIM = 192</span><br><span class="line">DEPTHS = [2, 2, 18, 2]</span><br><span class="line">NUM_HEADS = [6, 12, 24, 48]</span><br><span class="line">WINDOW_SIZE = 7</span><br><span class="line"> </span><br><span class="line">model_path = &#x27;&#x27;</span><br><span class="line"> </span><br><span class="line">checkpoint = torch.load(</span><br><span class="line">    model_path,</span><br><span class="line">    map_location=&#x27;cpu&#x27;,</span><br><span class="line">)</span><br><span class="line">model = SwinTransformer(</span><br><span class="line">    img_size=224,</span><br><span class="line">    patch_size=4,</span><br><span class="line">    in_chans=3,</span><br><span class="line">    num_classes=0,</span><br><span class="line">    embed_dim=EMBED_DIM,</span><br><span class="line">    depths=DEPTHS,</span><br><span class="line">    num_heads=NUM_HEADS,</span><br><span class="line">    window_size=WINDOW_SIZE,</span><br><span class="line">    mlp_ratio=4,</span><br><span class="line">    qkv_bias=True,</span><br><span class="line">    qk_scale=None,</span><br><span class="line">    drop_rate=0.0,</span><br><span class="line">    drop_path_rate=DROP_PATH_RATE,</span><br><span class="line">    ape=False,</span><br><span class="line">    patch_norm=True,</span><br><span class="line">)</span><br><span class="line"> </span><br><span class="line">new_state_dict = OrderedDict()</span><br><span class="line">for k, v in checkpoint[&#x27;model&#x27;].items():</span><br><span class="line">    if k != &#x27;head.weight&#x27;:</span><br><span class="line">        new_state_dict[k] = v</span><br><span class="line">    else:</span><br><span class="line">        print(k, v.shape)</span><br><span class="line">model.load_state_dict(new_state_dict, strict=False)</span><br><span class="line"> </span><br><span class="line">model.eval()</span><br><span class="line"> </span><br><span class="line">input_names = [&#x27;input&#x27;]</span><br><span class="line">output_names = [&#x27;output&#x27;]</span><br><span class="line">x = torch.randn(1, 3, 224, 224)</span><br><span class="line"> </span><br><span class="line">torch.onnx.export(</span><br><span class="line">    model,</span><br><span class="line">    x,</span><br><span class="line">    os.path.join(</span><br><span class="line">        os.path.split(model_path)[0],</span><br><span class="line">        &#x27;best.onnx&#x27;,</span><br><span class="line">    ),</span><br><span class="line">    input_names=input_names,</span><br><span class="line">    output_names=output_names,</span><br><span class="line">    verbose=False,</span><br><span class="line">    opset_version=12,</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>总结来说就是把字典导入到模型的结构里面然后在进行onnx的转换这部分可以自己网上找找教程听多的</p>
+<h2 id="二-模型从onnx模型转ir模型"><a href="#"></a>二.模型从onnx模型转ir模型</h2>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/397c40c6ae4a4094a2e8dc88cda85f48_cbd8964035d941349.png" alt=""></p>
+<p> 这里如果你是用python直接pip的话可以直接进入conda的环境去使用她，如果你是源码编译OpenVino的话可能要进入那个目录下载一下，这里我个人觉得如果你只是用来测试的话Python其实就很够用了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python mo_onnx.py --input_model &lt;输入模型路经&gt; --output_dir &lt;输出模型路经&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>（如果需要量化到FP16的话需要额外指定参数 --compress_to_fp16）</strong></p>
+<p>首先先将你的模型转换到Ir格式，这里放一下mo的参数你们可以有道翻译一下我个人英语不太好这里就不解释了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mo -h #可以查看mo的参数</span><br><span class="line">#或者是进入到mo.py所在的文件夹然后</span><br><span class="line">python mo.py -h</span><br></pre></td></tr></table></figure>
+<p> 之后测试一下转换完的模型推理速度</p>
+<p>进入Openvino这个文件夹</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/41d7baf4604c49d39d32700025ce258a_3e8eadeb2477454a9.png" alt=""></p>
+<p> 然后查看一下你模型量化的结果（FP32）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python ./benchmark_app.py -m &lt;量化后的xml文件&gt; -d CPU -api async -i &lt;选择图片路径&gt; -b 1</span><br></pre></td></tr></table></figure>
+<p>其中 <strong>-d</strong>指定的是你的设备 -api指定的是你的推理模式（同步还是异步推理）</p>
+<p>看一下FP32模型的速度</p>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/9dbc17d300f143568c3c598f768cc605_dbe4da939502499a9.png" alt=""></p>
+<p> FP16</p>
+<img width="598" height="240" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/bec68d6b955a4401bedf8d1c54e700c6_f4b0436799124d78a.png" class="jop-noMdConv">
+<p> ONNX模型推理速度</p>
+<img width="870" height="240" src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master/c25101469a364d8e9d8bea60f3dd3142_2ded076e1fd74ad0b.png" class="jop-noMdConv">
+<h2 id="三，Int8量化"><a href="#"></a> 三，<a href="https://so.csdn.net/so/search?q=Int8&amp;spm=1001.2101.3001.7020">Int8</a>量化</h2>
+<p>在转换之前，我们需要准备一下数据（在量化过程中会使用到）。对于自己的数据集首先转换成openvino支持的数据格式，这里使用imagenet数据集格式，对于分类任务需要annotation.txt文件以及labels.txt共两个文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── dataset:： 存放数据集的根目录</span><br><span class="line">│     ├── 1：         </span><br><span class="line">│     ├── 2：     </span><br><span class="line">│     ├── 3：         </span><br><span class="line">│     ├── 4：    </span><br><span class="line">│     └── .... ：              </span><br></pre></td></tr></table></figure>
+<p>这里给一个生成annotation.txt和labels.txt脚本（霹雳趴拉导师那边抄的）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import os</span><br><span class="line">import glob</span><br><span class="line"> </span><br><span class="line">image_dir = &quot;/your_dataset_dir&quot;</span><br><span class="line">assert os.path.exists(image_dir), &quot;image dir does not exist...&quot;</span><br><span class="line"> </span><br><span class="line">img_list = glob.glob(os.path.join(image_dir, &quot;*&quot;, &quot;*.jpg&quot;))</span><br><span class="line">assert len(img_list) &gt; 0, &quot;No images(.jpg) were found in image dir...&quot;</span><br><span class="line"> </span><br><span class="line">classes_info = os.listdir(image_dir)</span><br><span class="line">classes_info.sort()</span><br><span class="line">classes_dict = &#123;&#125;</span><br><span class="line"> </span><br><span class="line"># create label file</span><br><span class="line">with open(&quot;my_labels.txt&quot;, &quot;w&quot;) as lw:</span><br><span class="line">    # 注意，没有背景时，index要从0开始</span><br><span class="line">    for index, c in enumerate(classes_info, start=0):</span><br><span class="line">        txt = &quot;&#123;&#125;:&#123;&#125;&quot;.format(index, c)</span><br><span class="line">        if index != len(classes_info):</span><br><span class="line">            txt += &quot;\n&quot;</span><br><span class="line">        lw.write(txt)</span><br><span class="line">        classes_dict.update(&#123;c: str(index)&#125;)</span><br><span class="line">print(&quot;create my_labels.txt successful...&quot;)</span><br><span class="line"> </span><br><span class="line"># create annotation file</span><br><span class="line">with open(&quot;my_annotation.txt&quot;, &quot;w&quot;) as aw:</span><br><span class="line">    for img in img_list:</span><br><span class="line">        img_classes = classes_dict[img.split(&quot;/&quot;)[-2]]</span><br><span class="line">        txt = &quot;&#123;&#125; &#123;&#125;&quot;.format(img, img_classes)</span><br><span class="line">        if index != len(img_list):</span><br><span class="line">            txt += &quot;\n&quot;</span><br><span class="line">        aw.write(txt)</span><br><span class="line">print(&quot;create my_annotation.txt successful...&quot;)</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="3-1-模型测试"><a href="#"></a>3.1 模型测试</h3>
+<p>首先先测试FP32和FP16的模型精度，先准备一份yaml文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">models:</span><br><span class="line">  - name: mobileNetV3Fp32</span><br><span class="line">    launchers:</span><br><span class="line">      #下面指定运行的框架 dlsdk就是openvino， 也可以是tensorflow或者其他框架</span><br><span class="line">      #model/weights是要测试的模型文件名</span><br><span class="line">      #adapter是告诉accuracy checker模型的输出是目标分类还是目标识别或者其他的输出</span><br><span class="line">      - framework: openvino</span><br><span class="line">        model: /home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml</span><br><span class="line">        weights: /home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin</span><br><span class="line">        adapter: classification</span><br><span class="line"> </span><br><span class="line">    datasets:</span><br><span class="line">      #下面这部分是有关数据集的路径，数据集的格式(imagenet，VOC或者其他)以及标注文件的名字</span><br><span class="line">      - name: Flower</span><br><span class="line">        data_source: /mnt/hdd-4t/data/hanyue/mobileNet/flower</span><br><span class="line">        annotation_conversion:</span><br><span class="line">          converter: imagenet</span><br><span class="line">          annotation_file: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/my_annotation.txt&quot;</span><br><span class="line">        #预处理告诉ac_checker工具在把数据集图片送进模型前要做那些预处理，比如缩放，剪切或者调整RGB/BGR顺序之类</span><br><span class="line">        reader: opencv_imread # default setting</span><br><span class="line">        preprocessing:</span><br><span class="line">          - type: resize</span><br><span class="line">            size: 256</span><br><span class="line">            aspect_ratio_scale: greater</span><br><span class="line">          - type: crop</span><br><span class="line">            size: 224</span><br><span class="line">          - type: bgr_to_rgb # bgr format in opencv</span><br><span class="line">          - type: normalization</span><br><span class="line">            # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well</span><br><span class="line">            mean: (123.675, 116.28, 103.53)</span><br><span class="line">            std: (58.395, 57.12, 57.375)</span><br><span class="line">        #这里定义统计准确度用的算法，这里要看2种准确度，一个是top1的，还一个是top5的</span><br><span class="line">        metrics:</span><br><span class="line">          - name: accuracy @ top1</span><br><span class="line">            type: accuracy</span><br><span class="line">            top_k: 1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>model：存放你的xml的路径，在精度测试中可以先不用放weight,这个model也可以是你的onnx文件</p>
+<p>adapter:选择你的网络类型我这里是分类网络，openvino还支持目标检测网络具体可以看看config下面的配置</p>
+<p>datasource:下面存放的是你的数据集的根路径（这里有个坑就是这个文件夹下面存放的图片路径要和你上面生成的annotion.txt对应起来包括你的类别还有路径，相当于就是你把你数据集所有的图片全部放在这个路径下面，验证的时候由annotion.txt里面的东西验证）</p>
+<p>convert:我直接写imagenet没有什么影响</p>
+<p>preprocessing：里面的是写的是你预处理操作（记得颜色通道的转换不然的话精确度一直和训练的时候验证都是错的）这里有的预处理很傻逼我官网也没有找到如果有人找到的话欢迎评论区和我说一声哈哈哈哈哈</p>
+<p> metrics:定义的是评价指标这里是分类网络所以我采用的是accuary这里的top1表示，评分排名前1中能正确分出的概率。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">accuracy_check -c 你的yaml文件 -s ./ -td CPU</span><br></pre></td></tr></table></figure>
+<p>可以得到正确率了，之后int8量化也需要用到这个进行评估。</p>
+<h3 id="3-2-yaml文件以及json文件的准备"><a href="#"></a>3.2.yaml文件以及json文件的准备</h3>
+<p>这里int8有两种量化方式一种是全int8量化还有一种是混精度量化首先先准备一下model.yaml文件</p>
+<p>这里的yaml文件和刚刚那个yaml文件大差不差</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">models:</span><br><span class="line">  - name: mobileNetV3</span><br><span class="line">    launchers:</span><br><span class="line">      - framework: dlsdk</span><br><span class="line">        device: CPU</span><br><span class="line">        adapter: classification</span><br><span class="line">    #定义数据集</span><br><span class="line">    datasets:</span><br><span class="line">      - name: classification_dataset</span><br><span class="line">        #定义数据集路径</span><br><span class="line">        data_source: /mnt/hdd-4t/data/hanyue/mobileNet/flower</span><br><span class="line">        #定义annotation路径</span><br><span class="line">        annotation_conversion:</span><br><span class="line">          converter: imagenet</span><br><span class="line">          annotation_file: /home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/my_annotation.txt</span><br><span class="line"> </span><br><span class="line">        reader: opencv_imread # default setting</span><br><span class="line">        #这里需要提前定义预处理</span><br><span class="line">        preprocessing:</span><br><span class="line">          - type: resize</span><br><span class="line">            size: 256</span><br><span class="line">            aspect_ratio_scale: greater</span><br><span class="line">          - type: crop</span><br><span class="line">            size: 224</span><br><span class="line">          - type: bgr_to_rgb # bgr format in opencv</span><br><span class="line">          - type: normalization</span><br><span class="line">            # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well</span><br><span class="line">            mean: (123.675, 116.28, 103.53)</span><br><span class="line">            std: (58.395, 57.12, 57.375)</span><br><span class="line">        metrics:</span><br><span class="line">          - name: accuracy @ top1</span><br><span class="line">            type: accuracy</span><br><span class="line">            top_k: 1</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后就是json文件的编写</p>
+<h4 id="3-2-1-DefaultQuantization"><a href="#"></a>3.2.1 DefaultQuantization</h4>
+<p>这个应该是openvino中的全int8的量化</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">        &quot;model_name&quot;: &quot;MobileNetV3&quot;, </span><br><span class="line">        &quot;model&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml&quot;, </span><br><span class="line">        &quot;weights&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin&quot; </span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;engine&quot;: &#123;</span><br><span class="line">        &quot;config&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/defualtQuantization/model.yaml&quot;</span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;compression&quot;: &#123;</span><br><span class="line">        &quot;target_device&quot;: &quot;CPU&quot;, </span><br><span class="line">                                </span><br><span class="line">        &quot;algorithms&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;name&quot;: &quot;DefaultQuantization&quot;, </span><br><span class="line">                &quot;params&quot;: &#123;</span><br><span class="line">                    &quot;preset&quot;: &quot;performance&quot;,                      </span><br><span class="line">                    &quot;stat_subset_size&quot;: 300  </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>model：里面定义的是你最开始量化后的xml和bin的路径以及指定你的设备</p>
+<p>engine:就是你刚刚写好的yaml文件了</p>
+<p>target_device：就是你要量化的设备</p>
+<p>algorithms –</p>
+<p>                        name：这里指定的是你的量化方式</p>
+<p>                        preset：我也不知道什么意思</p>
+<p>                        stat_subset_size: 好像是采取多少张数据集的意思</p>
+<h4 id="3-2-2-AccuracyAwareQuantization"><a href="#"></a>3.2.2 AccuracyAwareQuantization</h4>
+<p>先放一下json文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">        &quot;model_name&quot;: &quot;MobileNetV3&quot;, </span><br><span class="line">        &quot;model&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.xml&quot;, </span><br><span class="line">        &quot;weights&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/runs/train/exp1/bestfp16.bin&quot; </span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;engine&quot;: &#123;</span><br><span class="line">        &quot;config&quot;: &quot;/home/yuesang/Pythonproject/MobileNetV3/onnxinference/int8inference/AccuracyAwareQuantization/model.yaml&quot;</span><br><span class="line">    &#125;,</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &quot;compression&quot;: &#123;</span><br><span class="line">        &quot;target_device&quot;: &quot;CPU&quot;, </span><br><span class="line">                                </span><br><span class="line">        &quot;algorithms&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;name&quot;: &quot;AccuracyAwareQuantization&quot;, </span><br><span class="line">                &quot;params&quot;: &#123;</span><br><span class="line">                    &quot;preset&quot;: &quot;performance&quot;,                      </span><br><span class="line">                    &quot;stat_subset_size&quot;: 300  ,</span><br><span class="line">                    &quot;maximal_drop&quot;: 0.1 </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>想比于DefaultQuantization就是name里面那个不一样以及多了一个maximal_drop,这个参数的意义是运行你的模型下降多少指标</p>
+<p>准确度的测试脚本可以用我3.1讲到的那个部分来测试只要把模型替换掉就OK了</p>
+<p>但是Openvino的量化好像只支撑分类网络和目标检测，后续找个时间写一下有关Pytorch自带的QAT的量化方法</p>
+]]></content>
+      <categories>
+        <category>环境配置</category>
+      </categories>
+      <tags>
+        <tag>Openvino</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>onnxruntime本机交叉编译</title>
+    <url>/2025/04/16/ubuntu%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/onnxruntime%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91/</url>
+    <content><![CDATA[<h2 id="天选之子版本">天选之子版本</h2>
+<p>刚好碰到一个工程需要使用arm64的机子上面使用onnxruntime，但是那台机子没有基本的编译环境，于是就在本机amd64的对onnxruntime库进行交叉编译<br>
+拉取源码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone --branch v1.8.0 --recursive https://github.com/microsoft/onnxruntime.git</span><br></pre></td></tr></table></figure>
+<p>编译代码如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./build.sh \</span><br><span class="line">  --config Release \</span><br><span class="line">  --build \</span><br><span class="line">  --update \</span><br><span class="line">  --build_dir build_arm64 \</span><br><span class="line">  --skip_tests \</span><br><span class="line">  --parallel $(nproc) \</span><br><span class="line">  --build_shared_lib \</span><br><span class="line">  --cmake_extra_defines \</span><br><span class="line">    CMAKE_TOOLCHAIN_FILE=./cmake-arm64-toolchain.cmake </span><br></pre></td></tr></table></figure>
+<p>编译的时候可能会下的很慢可以挂个代理<br>
+其中cmake-arm64-toolchain.cmake 如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># cmake-arm64-toolchain.cmake</span><br><span class="line">SET(CMAKE_SYSTEM_NAME Linux)</span><br><span class="line">SET(CMAKE_SYSTEM_PROCESSOR aarch64)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">set(ZLIB_ROOT /home/test/Desktop/yuesang/c++/3dpart/zlib)</span><br><span class="line">set(CMAKE_INCLUDE_PATH $&#123;ZLIB_ROOT&#125;/include)</span><br><span class="line">set(CMAKE_LIBRARY_PATH $&#123;ZLIB_ROOT&#125;/lib)</span><br><span class="line"># 指定工具链前缀路径</span><br><span class="line">set(TOOLCHAIN_ROOT /home/test/Desktop/yuesang/c++/3dpart/gcc-10.2.1-20210303-sigmastar-glibc-x86_64_aarch64-linux-gnu)</span><br><span class="line"></span><br><span class="line">set(CMAKE_C_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-gcc)</span><br><span class="line">set(CMAKE_CXX_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-g++)</span><br><span class="line"></span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)</span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)</span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)</span><br><span class="line">SET(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>#这里我是缺少zlib才需要的如果没有可以不用加重点是设置TOOLCHAIN_ROOT就是你的编译器相关的，本地也可以下载arrch64相关的编译器，如果是本地的就这样</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)</span><br><span class="line">set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)</span><br></pre></td></tr></table></figure>
+<p>如果build成功那么恭喜你，如果没有成功接着往下看，我把我编译碰到的问题先都罗列出来</p>
+<h2 id="倒霉蛋一号">倒霉蛋一号</h2>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//a79f3eec63052fdf15ce9570a4d5efe4.png" alt="a79f3eec63052fdf15ce9570a4d5efe4.png"><br>
+这是第一个错误缺少zlib库，你可以去下载一下<a href="https://zlib.net/">zlib</a><br>
+然后编译一下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd zlib-1.2.13</span><br><span class="line">mkdir build-arm64 &amp;&amp; cd build-arm64</span><br><span class="line"></span><br><span class="line">cmake .. \</span><br><span class="line">  -DCMAKE_TOOLCHAIN_FILE=../toolchain-zlib.cmake \</span><br><span class="line">  -DCMAKE_INSTALL_PREFIX=/home/test/zlib-arm64</span><br><span class="line"></span><br><span class="line">make -j$(nproc)</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>toolchain-zlib.cmake跟上面那个差不多自己设置一下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># toolchain-zlib.cmake</span><br><span class="line"># 用于使用 sigmastar 交叉编译器编译 zlib 给 aarch64 (ARM64)</span><br><span class="line"></span><br><span class="line"># 设置目标平台为 ARM64 Linux</span><br><span class="line">set(CMAKE_SYSTEM_NAME Linux)</span><br><span class="line">set(CMAKE_SYSTEM_PROCESSOR aarch64)</span><br><span class="line"></span><br><span class="line"># 设置交叉编译器路径</span><br><span class="line">set(TOOLCHAIN_ROOT)</span><br><span class="line"></span><br><span class="line"># 设置 C/C++ 编译器</span><br><span class="line">set(CMAKE_C_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-gcc)</span><br><span class="line">set(CMAKE_CXX_COMPILER $&#123;TOOLCHAIN_ROOT&#125;/bin/aarch64-linux-gnu-g++)</span><br><span class="line"></span><br><span class="line"># 禁用默认查找主机路径</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH $&#123;TOOLCHAIN_ROOT&#125;)</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)</span><br><span class="line">set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)</span><br><span class="line"></span><br><span class="line"># 可选：生成静态库（如需 .a 文件）</span><br><span class="line">set(BUILD_SHARED_LIBS OFF)</span><br><span class="line"></span><br><span class="line"># 启用 Position Independent Code（为了方便后续链接进 ONNX Runtime）</span><br><span class="line">set(CMAKE_POSITION_INDEPENDENT_CODE ON)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后查看我天选之子版的说明</p>
+<h2 id="倒霉蛋二号">倒霉蛋二号</h2>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//d6708e500ec87edfb62d8aa3cdd51644.png" alt="d6708e500ec87edfb62d8aa3cdd51644.png"><br>
+这个错误一度把我搞到崩溃，本来想用docker的，但是docker的网络一致没弄好，然后配置docker的时候下了一个qemu-aarch64然后居然就能通过了，你说屌不屌<br>
+直接下载</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo apt install qemu-user qemu-user-static</span><br></pre></td></tr></table></figure>
+<h2 id="倒霉蛋三号">倒霉蛋三号</h2>
+<p><img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//716531467da86fc1f8bdb3324dad8f8b.png" alt="716531467da86fc1f8bdb3324dad8f8b.png"><br>
+解决了上面那个问题又碰到了这个，因为我的gnu没有装在本机导致qume-arrch64找不到相关的依赖所以你还需要设置一下他的路径</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export QEMU_LD_PREFIX=</span><br></pre></td></tr></table></figure>
+<p>这个是一次性的或者土办法，直接用ln -s软连接也可以</p>
+<h2 id="倒霉蛋四号">倒霉蛋四号</h2>
+<p>json库有异常<br>
+<img src="https://raw.githubusercontent.com/YueSangShuai/upload_imgs/master//79e04aaffa98e173006e77603cc0343c.png" alt="79e04aaffa98e173006e77603cc0343c.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd ./onnxruntime/cmake/external/json</span><br><span class="line"></span><br><span class="line">git fetch</span><br><span class="line">git checkout v3.9.1  # 或者使用 master 分支</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后cd到你onnxruntime路径下面</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rm -rf .git/modules/cmake/external/json</span><br><span class="line"></span><br><span class="line"># 删除实际子模块目录</span><br><span class="line">rm -rf cmake/external/json</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>最后进入到cmake/external下面把json下在下来</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone --branch v3.9.1 https://github.com/nlohmann/json.git cmake/external/json</span><br></pre></td></tr></table></figure>
+<p>至此编译解释，我在这里提一句，我写文章的意义是在于给自己看，写出来的途中顺便能帮到一些人，对于某些平台明明就是一个很简单的东西，但是非得要vip文章或者收费，十多莲花剩一朵。</p>
+]]></content>
+      <categories>
+        <category>环境配置</category>
+      </categories>
+      <tags>
+        <tag>onnxruntime</tag>
       </tags>
   </entry>
   <entry>
